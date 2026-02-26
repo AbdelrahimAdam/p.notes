@@ -157,14 +157,6 @@
                 </svg>
               </button>
               
-              <!-- Track Order Link -->
-              <router-link to="/track-order" class="luxury-header-action" :title="languageStore.t('trackOrder')">
-                <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 20L3 17V7L9 4L15 7L21 4V14M9 20V11M9 20L15 17M9 4L15 7M15 7V14M15 17V20M15 17L21 20V14M3 7L9 11" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </router-link>
-              
               <!-- Simple Wishlist Link -->
               <router-link to="/wishlist" class="luxury-header-action">
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
@@ -197,11 +189,23 @@
               </svg>
             </router-link>
             
-            <!-- Track Order (Mobile) -->
-            <router-link to="/track-order" class="mobile-action-icon-link" :title="languageStore.t('trackOrder')">
+            <!-- Customer Login/Account (Mobile) -->
+            <template v-if="!isAuthenticated">
+              <router-link to="/login" class="mobile-action-icon-link" :title="languageStore.t('customerLogin')">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                        stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
+                        stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </router-link>
+            </template>
+            <router-link v-else to="/account" class="mobile-action-icon-link" :title="languageStore.t('account')">
               <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M9 20L3 17V7L9 4L15 7L21 4V14M9 20V11M9 20L15 17M9 4L15 7M15 7V14M15 17V20M15 17L21 20V14M3 7L9 11" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                      stroke="currentColor" stroke-width="1.5"/>
+                <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
+                      stroke="currentColor" stroke-width="1.5"/>
               </svg>
             </router-link>
             
@@ -338,8 +342,10 @@
             <template v-if="!isAuthenticated">
               <router-link to="/login" class="mobile-action-btn" @click="closeMobileMenu">
                 <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
-                  <path d="M11 16l-4-4m0 0l4-4m-4 4h14m-6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                        stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
+                        stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <span>{{ languageStore.t('customerLogin') || 'Customer Login' }}</span>
               </router-link>
@@ -354,7 +360,7 @@
             </template>
             
             <template v-else>
-              <button class="mobile-action-btn" @click="handleMobileAction('user')">
+              <router-link to="/account" class="mobile-action-btn" @click="closeMobileMenu">
                 <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
                         stroke="currentColor" stroke-width="1.5"/>
@@ -362,17 +368,8 @@
                         stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <span>{{ languageStore.t('account') }}</span>
-              </button>
+              </router-link>
             </template>
-            
-            <!-- Track Order in Mobile Menu -->
-            <router-link to="/track-order" class="mobile-action-btn" @click="closeMobileMenu">
-              <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M9 20L3 17V7L9 4L15 7L21 4V14M9 20V11M9 20L15 17M9 4L15 7M15 7V14M15 17V20M15 17L21 20V14M3 7L9 11" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>{{ languageStore.t('trackOrder') }}</span>
-            </router-link>
             
             <!-- Returns in Mobile Menu -->
             <router-link to="/returns" class="mobile-action-btn" @click="closeMobileMenu">
@@ -440,12 +437,13 @@
             <span>{{ languageStore.t('orders') }}</span>
           </router-link>
           
-          <router-link to="/track-order" class="dropdown-item" @click="userMenuOpen = false">
+          <router-link to="/returns" class="dropdown-item" @click="userMenuOpen = false">
             <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M9 20L3 17V7L9 4L15 7L21 4V14M9 20V11M9 20L15 17M9 4L15 7M15 7V14M15 17V20M15 17L21 20V14M3 7L9 11" 
+              <path d="M16 15v-1a4 4 0 00-8 0v1m-4 0a4 4 0 014-4h8a4 4 0 014 4v4a4 4 0 01-4 4H8a4 4 0 01-4-4v-4z" 
                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <span>{{ languageStore.t('trackOrder') }}</span>
+            <span>{{ languageStore.t('returns') }}</span>
           </router-link>
           
           <router-link to="/wishlist" class="dropdown-item" @click="userMenuOpen = false">
@@ -454,15 +452,6 @@
                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span>{{ languageStore.t('wishlist') }}</span>
-          </router-link>
-          
-          <router-link to="/returns" class="dropdown-item" @click="userMenuOpen = false">
-            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M16 15v-1a4 4 0 00-8 0v1m-4 0a4 4 0 014-4h8a4 4 0 014 4v4a4 4 0 01-4 4H8a4 4 0 01-4-4v-4z" 
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <span>{{ languageStore.t('returns') }}</span>
           </router-link>
           
           <router-link v-if="isAdmin" to="/admin" class="dropdown-item" @click="userMenuOpen = false">
@@ -589,11 +578,6 @@ const handleMobileAction = (action: string) => {
   switch(action) {
     case 'search':
       toggleSearch()
-      break
-    case 'user':
-      if (isAuthenticated) {
-        userMenuOpen.value = true
-      }
       break
   }
 }
@@ -1147,12 +1131,13 @@ onUnmounted(() => {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* Mobile Actions Row - Better spacing */
+
+/* Mobile Actions Row - Tighter spacing */
 .mobile-actions-row {
   display: none;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.25rem; /* Reduced from 0.5rem */
+  gap: 0.2rem; /* Reduced from 0.25rem */
   flex: 1;
 }
 
@@ -1165,14 +1150,14 @@ onUnmounted(() => {
 /* Mobile Action Icon Links - Smaller and consistent */
 .mobile-action-icon-link {
   position: relative;
-  width: 32px; /* Reduced from 36px */
-  height: 32px; /* Reduced from 36px */
+  width: 30px; /* Slightly smaller */
+  height: 30px; /* Slightly smaller */
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(212, 175, 55, 0.08);
   border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 6px; /* Smaller radius */
+  border-radius: 6px;
   color: #f4e7c1;
   text-decoration: none;
   flex-shrink: 0;
@@ -1180,8 +1165,8 @@ onUnmounted(() => {
 
 /* Mobile icons - smaller */
 .mobile-icon {
-  width: 16px; /* Reduced from 18px */
-  height: 16px; /* Reduced from 18px */
+  width: 15px; /* Slightly smaller */
+  height: 15px; /* Slightly smaller */
   stroke: currentColor;
 }
 
@@ -1191,11 +1176,11 @@ onUnmounted(() => {
   position: absolute;
   top: -3px;
   right: -3px;
-  min-width: 14px;
-  height: 14px;
+  min-width: 13px;
+  height: 13px;
   background: #ec4899;
   color: white;
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -1214,20 +1199,20 @@ onUnmounted(() => {
 .luxury-mobile-toggle {
   display: none;
   flex-direction: column;
-  gap: 3px; /* Reduced from 4px */
+  gap: 2px;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
   z-index: 1001;
-  width: 32px; /* Reduced from 36px */
-  height: 32px; /* Reduced from 36px */
+  width: 30px;
+  height: 30px;
   align-items: center;
   justify-content: center;
   background: rgba(212, 175, 55, 0.08);
   border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 6px; /* Smaller radius */
+  border-radius: 6px;
   margin-left: auto;
 }
 
@@ -1244,15 +1229,15 @@ onUnmounted(() => {
 
 /* Toggle lines - smaller */
 .mobile-toggle-line {
-  width: 16px; /* Reduced from 18px */
-  height: 1.5px; /* Thinner */
+  width: 15px;
+  height: 1.5px;
   background: #f4e7c1;
   transition: all 0.3s ease;
   border-radius: 1px;
 }
 
 .luxury-mobile-toggle.open .mobile-toggle-line:nth-child(1) {
-  transform: rotate(45deg) translate(4px, 4px); /* Adjusted for smaller size */
+  transform: rotate(45deg) translate(3.5px, 3.5px);
 }
 
 .luxury-mobile-toggle.open .mobile-toggle-line:nth-child(2) {
@@ -1260,7 +1245,7 @@ onUnmounted(() => {
 }
 
 .luxury-mobile-toggle.open .mobile-toggle-line:nth-child(3) {
-  transform: rotate(-45deg) translate(4px, -4px); /* Adjusted for smaller size */
+  transform: rotate(-45deg) translate(3.5px, -3.5px);
 }
 
 /* Mobile Language Toggle - Smaller */
@@ -1272,8 +1257,8 @@ onUnmounted(() => {
 
 .mobile-language-toggle :deep(.current-language) {
   padding: 0;
-  width: 32px; /* Match other icons */
-  height: 32px; /* Match other icons */
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1613,6 +1598,7 @@ onUnmounted(() => {
   right: auto;
   left: 1rem;
 }
+
 /* Search Overlay */
 .luxury-search-overlay {
   position: fixed;

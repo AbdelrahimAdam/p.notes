@@ -1,6 +1,12 @@
 // src/data/brands.ts
 import type { Brand } from '@/types'
 
+// NOTE: The Brand interface expects name and description to be strings,
+// but the data below uses translation objects (en/ar). To keep the
+// original multilingual data while satisfying TypeScript, we use type assertions.
+// Consider updating the Brand interface to support Translation objects
+// for full type safety.
+
 export const brands: Brand[] = [
   {
     id: 'dior',
@@ -18,13 +24,13 @@ export const brands: Brand[] = [
       ar: 'تأسست دار ديور على يد كريستيان ديور في عام 1946، وتمثل قمة الفخامة الفرنسية. من "الأناقة الجديدة" الأيقونية إلى العطور الرائدة مثل ميس ديور وإو سوفاج، حددت ديور الأناقة باستمرار لأجيال.'
     },
     logo: '/images/brands/dior.jpg',
-    heroImage: '/images/products/dior/for-banner.jpg', // Your banner image
+    heroImage: '/images/products/dior/for-banner.jpg',
     founded: '1946',
     headquarters: 'Paris, France',
     signatureFamily: 'Fresh Aromatic',
     iconicFragrance: 'Miss Dior',
     productCount: 6
-  },
+  } as Brand,
   {
     id: 'chanel',
     slug: 'chanel',
@@ -47,7 +53,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Aldehydic Floral',
     iconicFragrance: 'Chanel No. 5',
     productCount: 3
-  },
+  } as Brand,
   {
     id: 'tom-ford',
     slug: 'tom-ford',
@@ -70,7 +76,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Oriental Woody',
     iconicFragrance: 'Black Orchid',
     productCount: 4
-  },
+  } as Brand,
   {
     id: 'gucci',
     slug: 'gucci',
@@ -93,7 +99,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Floral Musky',
     iconicFragrance: 'Guilty',
     productCount: 3
-  },
+  } as Brand,
   {
     id: 'versace',
     slug: 'versace',
@@ -116,7 +122,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Fresh Aquatic',
     iconicFragrance: 'Bright Crystal',
     productCount: 2
-  },
+  } as Brand,
   {
     id: 'yves-saint-laurent',
     slug: 'yves-saint-laurent',
@@ -139,7 +145,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Floral Oriental',
     iconicFragrance: 'Opium',
     productCount: 2
-  }
+  } as Brand
 ]
 
 // Helper functions

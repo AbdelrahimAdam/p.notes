@@ -11,10 +11,9 @@ import {
   doc, 
   updateDoc, 
   addDoc, 
-  deleteDoc,
   serverTimestamp,
   Timestamp,
-  FieldValue,          // <-- added for type casting
+  FieldValue,
   limit,
   startAfter,
   QueryDocumentSnapshot,
@@ -33,22 +32,9 @@ import type {
   ShippingAddress, 
   PaymentMethod,
   PaymentStatus,
-  StatusHistoryItem
+  StatusHistoryItem,
+  FirestoreOrder
 } from '@/types'
-
-export interface FirestoreOrder extends Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'shippedAt' | 'deliveredAt' | 'cancelledAt' | 'statusHistory'> {
-  createdAt: Timestamp | FieldValue   // <-- allow FieldValue during creation
-  updatedAt: Timestamp | FieldValue
-  shippedAt?: Timestamp | FieldValue | null
-  deliveredAt?: Timestamp | FieldValue | null
-  cancelledAt?: Timestamp | FieldValue | null
-  statusHistory?: Array<{
-    status: OrderStatus
-    timestamp: Timestamp
-    note?: string
-    updatedBy?: string
-  }>
-}
 
 export const useOrdersStore = defineStore('orders', () => {
   const authStore = useAuthStore()
@@ -84,7 +70,6 @@ export const useOrdersStore = defineStore('orders', () => {
     orders.value.filter(order => order.status === 'delivered').length
   )
 
-  // ✅ Revenue counts only delivered AND paid orders
   const totalRevenue = computed(() => 
     orders.value
       .filter(order => order.status === 'delivered' && order.paymentStatus === 'paid')
@@ -149,21 +134,26 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const convertTimestampsToDates = (firestoreOrder: FirestoreOrder & { id: string }): Order => ({
     ...firestoreOrder,
+    id: firestoreOrder.id,
+    userId: firestoreOrder.userId ?? undefined,
+    guestId: firestoreOrder.guestId ?? undefined,
     createdAt: (firestoreOrder.createdAt as Timestamp)?.toDate?.() || new Date(),
     updatedAt: (firestoreOrder.updatedAt as Timestamp)?.toDate?.() || new Date(),
-    shippedAt: (firestoreOrder.shippedAt as Timestamp)?.toDate?.() || null,
-    deliveredAt: (firestoreOrder.deliveredAt as Timestamp)?.toDate?.() || null,
-    cancelledAt: (firestoreOrder.cancelledAt as Timestamp)?.toDate?.() || null,
+    shippedAt: (firestoreOrder.shippedAt as Timestamp)?.toDate?.() || undefined,
+    deliveredAt: (firestoreOrder.deliveredAt as Timestamp)?.toDate?.() || undefined,
+    cancelledAt: (firestoreOrder.cancelledAt as Timestamp)?.toDate?.() || undefined,
     statusHistory: firestoreOrder.statusHistory?.map(h => ({
-      ...h,
-      timestamp: h.timestamp.toDate()
+      status: h.status,
+      date: h.timestamp.toDate(),
+      note: h.note,
+      updatedBy: h.updatedBy
     }))
   })
 
   const getCurrentUserId = (): string | null => {
     if (!authStore.isAuthenticated) return null
-    if (authStore.user?.id) return authStore.user.id
-    if (authStore.customer?.id) return authStore.customer.id
+    if (authStore.user?.uid) return authStore.user.uid
+    if (authStore.customer?.uid) return authStore.customer.uid
     return null
   }
 
@@ -366,7 +356,7 @@ export const useOrdersStore = defineStore('orders', () => {
     try {
       const newOrder = await runTransaction(db, async (transaction) => {
         const orderNumber = generateOrderNumber()
-        const guestId = !authStore.isAuthenticated ? generateGuestId() : null
+        const guestId = !authStore.isAuthenticated ? generateGuestId() : undefined
 
         const currentUserId = getCurrentUserId()
         const currentUserEmail = getCurrentUserEmail()
@@ -376,7 +366,7 @@ export const useOrdersStore = defineStore('orders', () => {
           const product = productsStore.products.find(p => p.id === item.id)
           return {
             id: item.id,
-            productId: item.id,                // <-- productId is required for stock updates
+            productId: item.id,
             name: product?.name?.en || item.name?.en || 'Product',
             nameAr: product?.name?.ar || item.name?.ar,
             price: product?.price || item.price,
@@ -384,7 +374,9 @@ export const useOrdersStore = defineStore('orders', () => {
             size: product?.size || item.size || '100ml',
             concentration: product?.concentration || item.concentration || 'Eau de Parfum',
             image: product?.imageUrl || item.imageUrl || '/images/default-product.jpg',
-            brand: product?.brand || item.brand || ''
+            brand: product?.brand || item.brand || '',
+            imageUrl: product?.imageUrl || item.imageUrl || '',
+            originalPrice: product?.originalPrice
           }
         })
 
@@ -395,7 +387,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
         const statusHistory: StatusHistoryItem[] = [{
           status: 'pending',
-          timestamp: new Date(),
+          date: new Date(),
           note: 'Order placed successfully',
           updatedBy: authStore.isAuthenticated ? currentUserId || 'customer' : 'guest'
         }]
@@ -415,19 +407,21 @@ export const useOrdersStore = defineStore('orders', () => {
           },
           items: orderItems,
           subtotal,
-          shipping,
+          shippingCost: shipping,                     // ✅ set required shippingCost
           tax,
           total,
           status: 'pending',
           paymentMethod,
           paymentStatus: paymentMethod === 'cash_on_delivery' ? 'pending' : 'paid',
-          shippingAddress,
+          shippingAddress,                            // keep for legacy
           notes: notes || '',
           statusHistory: statusHistory.map(h => ({
-            ...h,
-            timestamp: Timestamp.fromDate(h.timestamp)
+            status: h.status,
+            timestamp: Timestamp.fromDate(h.date),
+            note: h.note,
+            updatedBy: h.updatedBy
           })),
-          createdAt: serverTimestamp() as any,    // <-- cast to any to satisfy FirestoreOrder
+          createdAt: serverTimestamp() as any,
           updatedAt: serverTimestamp() as any
         }
 
@@ -458,11 +452,12 @@ export const useOrdersStore = defineStore('orders', () => {
 
       const createdOrder: Order = {
         ...newOrder,
+        id: newOrder.id,
         createdAt: new Date(),
         updatedAt: new Date(),
-        shippedAt: null,
-        deliveredAt: null,
-        cancelledAt: null
+        shippedAt: undefined,
+        deliveredAt: undefined,
+        cancelledAt: undefined
       }
 
       orders.value = [createdOrder, ...orders.value]
@@ -592,7 +587,7 @@ export const useOrdersStore = defineStore('orders', () => {
       const statusHistory: StatusHistoryItem[] = order.statusHistory || []
       statusHistory.push({
         status,
-        timestamp: new Date(),
+        date: new Date(),
         note: note || getStatusDescription(status),
         updatedBy: currentUserName || currentUserId || 'admin'
       })
@@ -601,8 +596,10 @@ export const useOrdersStore = defineStore('orders', () => {
         status,
         updatedAt: serverTimestamp(),
         statusHistory: statusHistory.map(h => ({
-          ...h,
-          timestamp: Timestamp.fromDate(h.timestamp)
+          status: h.status,
+          timestamp: Timestamp.fromDate(h.date),
+          note: h.note,
+          updatedBy: h.updatedBy
         }))
       }
 

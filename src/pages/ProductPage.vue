@@ -14,7 +14,7 @@
 
   <div v-else-if="product" class="min-h-screen bg-white">
     <SEOHead 
-      :title="product.name[currentLanguage]"
+      :title="productName"
       :description="productDescription"
       :image="productImage"
       type="product"
@@ -40,7 +40,7 @@
         </span>
         <span class="mx-2 lg:mx-3">/</span>
         <span class="text-gray-900 font-medium truncate max-w-[150px] lg:max-w-none">
-          {{ product.name[currentLanguage] }}
+          {{ productName }}
         </span>
       </nav>
     </div>
@@ -53,7 +53,7 @@
           <div class="bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden shadow-luxury-lg relative">
             <img 
               :src="productImage" 
-              :alt="product.name[currentLanguage]"
+              :alt="productName"
               class="w-full h-auto object-cover aspect-square lg:aspect-auto"
               loading="eager"
             />
@@ -98,7 +98,7 @@
             >
               <img 
                 :src="img" 
-                :alt="`${product.name[currentLanguage]} - ${index + 1}`"
+                :alt="`${productName} - ${index + 1}`"
                 class="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -129,7 +129,7 @@
 
           <!-- Product Name - Responsive Typography -->
           <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-display-en font-bold text-gray-900 leading-tight">
-            {{ product.name[currentLanguage] }}
+            {{ productName }}
           </h1>
 
           <!-- Price & Size - Compact -->
@@ -157,7 +157,7 @@
           <!-- Description - Clean Typography -->
           <div class="prose prose-sm lg:prose-base max-w-none">
             <p class="text-gray-700 leading-relaxed whitespace-pre-line">
-              {{ product.description[currentLanguage] }}
+              {{ productDescriptionFull }}
             </p>
           </div>
 
@@ -380,6 +380,12 @@ const brandsStore = useBrandsStore()
 
 const { currentLanguage, isRTL, t } = languageStore
 
+// Safe language for indexing (only 'en' or 'ar')
+const safeLang = computed(() => {
+  const lang = currentLanguage.value
+  return lang === 'en' || lang === 'ar' ? lang : 'en'
+})
+
 const product = ref<Product | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -389,7 +395,21 @@ const brandDetails = ref<any>(null)
 const isAddingToCart = ref(false)
 const showQuantityAnimation = ref(false)
 
-// Computed properties
+// Computed properties with safe language indexing
+const productName = computed(() => {
+  return product.value?.name?.[safeLang.value] || ''
+})
+
+const productDescription = computed(() => {
+  const desc = product.value?.description?.[safeLang.value] || ''
+  return desc.length > 160 ? desc.substring(0, 160) + '...' : desc
+})
+
+// Full description for the main paragraph
+const productDescriptionFull = computed(() => {
+  return product.value?.description?.[safeLang.value] || ''
+})
+
 const productImage = computed(() => {
   return selectedImage.value || product.value?.imageUrl || ''
 })
@@ -408,12 +428,6 @@ const productImages = computed(() => {
   }
   
   return images.filter(Boolean)
-})
-
-const productDescription = computed(() => {
-  if (!product.value) return ''
-  const desc = product.value.description?.[currentLanguage] || ''
-  return desc.length > 160 ? desc.substring(0, 160) + '...' : desc
 })
 
 const isNewArrival = computed(() => {
@@ -499,21 +513,8 @@ const addToCart = async () => {
   isAddingToCart.value = true
   
   try {
-    // Prepare product data for cart
-    const cartProduct = {
-      id: product.value.id,
-      name: product.value.name,
-      imageUrl: product.value.imageUrl,
-      price: product.value.price,
-      originalPrice: product.value.originalPrice,
-      size: product.value.size,
-      concentration: product.value.concentration,
-      brand: product.value.brand,
-      brandSlug: product.value.brandSlug
-    }
-    
-    // Add to cart using the store
-    cartStore.addToCart(cartProduct, quantity.value)
+    // Pass the full product object – it already satisfies the Product type
+    cartStore.addToCart(product.value, quantity.value)
     
     // Show success animation
     showQuantityAnimation.value = true
@@ -539,20 +540,8 @@ const viewProduct = (relatedProduct: Product) => {
 }
 
 const handleRelatedProductAdd = (relatedProduct: Product) => {
-  // Prepare product data for cart
-  const cartProduct = {
-    id: relatedProduct.id,
-    name: relatedProduct.name,
-    imageUrl: relatedProduct.imageUrl,
-    price: relatedProduct.price,
-    originalPrice: relatedProduct.originalPrice,
-    size: relatedProduct.size,
-    concentration: relatedProduct.concentration,
-    brand: relatedProduct.brand,
-    brandSlug: relatedProduct.brandSlug
-  }
-  
-  cartStore.addToCart(cartProduct, 1)
+  // Pass the full product object
+  cartStore.addToCart(relatedProduct, 1)
 }
 
 const loadBrandDetails = async () => {
@@ -612,7 +601,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Optimized Product Page Styles - No Wasted Space */
+/* ... (same styles as before) ... */
 .shadow-luxury-lg {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
 }

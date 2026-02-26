@@ -96,7 +96,7 @@
               {{ t('phone') }}
             </label>
             <input
-              v-model="form.phone"
+              v-model="form.phoneNumber"
               type="tel"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500"
               :placeholder="t('phonePlaceholder')"
@@ -210,14 +210,11 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
-import { showNotification } from '@/utils/notifications'
+import { showSuccess, showError, showInfo } from '@/utils/notifications'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useLanguageStore()
-
-// Destructure only user (actions are used via authStore)
-const { user } = authStore
 
 // State
 const saving = ref(false)
@@ -228,7 +225,7 @@ const form = reactive({
   firstName: '',
   lastName: '',
   email: '',
-  phone: '',
+  phoneNumber: '',
   dob: '',
   newsletter: false,
   smsNotifications: false
@@ -243,11 +240,10 @@ const passwordForm = reactive({
 
 // Computed
 const userInitials = computed(() => {
-  // Safe guard: ensure user ref exists and has value
-  if (!user || !user.value || !user.value.displayName) return 'U'
-  return user.value.displayName
+  if (!authStore.user?.displayName) return 'U'
+  return authStore.user.displayName
     .split(' ')
-    .map(n => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
@@ -261,27 +257,25 @@ const triggerFileUpload = () => {
 const handleFileUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    const file = input.files[0]
-    // Handle file upload to storage
-    showNotification.info(t('uploadingImage'))
+    const _file = input.files[0] // file is intentionally unused for now
+    showInfo(t('uploadingImage'))
   }
 }
 
 const handleSubmit = async () => {
   saving.value = true
   try {
-    // Update customer profile using authStore's updateCustomerProfile
     await authStore.updateCustomerProfile({
       displayName: `${form.firstName} ${form.lastName}`,
-      phone: form.phone,
+      phoneNumber: form.phoneNumber,
       newsletter: form.newsletter,
       smsNotifications: form.smsNotifications,
       dob: form.dob
     })
     
-    showNotification.success(t('profileUpdated'))
+    showSuccess(t('profileUpdated'))
   } catch (error) {
-    showNotification.error(t('updateFailed'))
+    showError(t('updateFailed'))
   } finally {
     saving.value = false
   }
@@ -289,21 +283,20 @@ const handleSubmit = async () => {
 
 const changePassword = async () => {
   if (passwordForm.new !== passwordForm.confirm) {
-    showNotification.error(t('passwordsDoNotMatch'))
+    showError(t('passwordsDoNotMatch'))
     return
   }
   
   try {
-    // Use authStore's changeCustomerPassword
     await authStore.changeCustomerPassword(passwordForm.current, passwordForm.new)
-    showNotification.success(t('passwordUpdated'))
+    showSuccess(t('passwordUpdated'))
     
     // Clear password form
     passwordForm.current = ''
     passwordForm.new = ''
     passwordForm.confirm = ''
   } catch (error) {
-    showNotification.error(t('passwordUpdateFailed'))
+    showError(t('passwordUpdateFailed'))
   }
 }
 
@@ -312,13 +305,14 @@ const resetForm = () => {
 }
 
 const loadUserData = () => {
-  if (!user || !user.value) return
+  const user = authStore.user
+  if (!user) return
   
-  const nameParts = user.value.displayName?.split(' ') || ['', '']
+  const nameParts = user.displayName?.split(' ') || ['', '']
   form.firstName = nameParts[0] || ''
   form.lastName = nameParts.slice(1).join(' ') || ''
-  form.email = user.value.email || ''
-  form.phone = user.value.phone || ''
+  form.email = user.email || ''
+  form.phoneNumber = (user as any).phoneNumber || '' // phoneNumber may not be on AdminUser; we cast to any
   // Load other preferences from database (to be implemented)
 }
 

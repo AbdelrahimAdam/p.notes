@@ -163,7 +163,7 @@
               <div v-else class="space-y-1.5">
                 <div 
                   @dragover.prevent="dragOver = true"
-                  @dragleave="dragOver = false"
+                  @dragleave.prevent="dragOver = false"
                   @drop.prevent="handleFileDrop"
                   class="relative rounded-lg border-2 border-dashed transition-colors"
                   :class="{
@@ -403,13 +403,34 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useLanguageStore } from '@/stores/language'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/firebase/config' // adjust path if needed
+
+// Define the data structure for the emitted brand
+interface MarqueeBrandData {
+  id: string
+  name: string
+  logo: string
+  website?: string
+  category?: string
+  displayOrder: number
+  isActive: boolean
+  slug: string
+  createdAt: string
+  method: 'url' | 'upload'
+  fileInfo?: {
+    name: string
+    size: number
+    type: string
+  } | null
+}
 
 const languageStore = useLanguageStore()
 const { t } = languageStore
 
 const emit = defineEmits<{
   close: []
-  save: [data: any]
+  save: [data: MarqueeBrandData]
 }>()
 
 // Reactive state
@@ -452,7 +473,7 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-const isValidUrl = (url: string) => {
+const isValidUrl = (url: string): boolean => {
   try {
     new URL(url)
     return true
@@ -461,7 +482,7 @@ const isValidUrl = (url: string) => {
   }
 }
 
-const previewLogo = (url: string) => {
+const previewLogo = (url: string): void => {
   if (url && isValidUrl(url)) {
     logoPreview.value = url
     // Store in form data if from URL method
@@ -473,12 +494,12 @@ const previewLogo = (url: string) => {
   }
 }
 
-const handleLogoError = () => {
+const handleLogoError = (): void => {
   alert(t('Failed to load logo. Please check the URL or file.'))
   logoPreview.value = ''
 }
 
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = (event: Event): void => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
     const file = input.files[0]
@@ -509,7 +530,7 @@ const handleFileUpload = (event: Event) => {
   }
 }
 
-const handleFileDrop = (event: DragEvent) => {
+const handleFileDrop = (event: DragEvent): void => {
   dragOver.value = false
   const files = event.dataTransfer?.files
   if (files && files[0]) {
@@ -527,7 +548,7 @@ const handleFileDrop = (event: DragEvent) => {
   }
 }
 
-const validateForm = () => {
+const validateForm = (): boolean => {
   let isValid = true
   
   // Reset errors
@@ -563,18 +584,38 @@ const validateForm = () => {
   return isValid
 }
 
-const save = async () => {
+const uploadToFirebase = async (file: File): Promise<string> => {
+  // Create a unique filename
+  const timestamp = Date.now()
+  const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
+  const filePath = `marquee/${timestamp}_${safeName}`
+  const fileRef = storageRef(storage, filePath)
+  
+  await uploadBytes(fileRef, file)
+  const downloadURL = await getDownloadURL(fileRef)
+  return downloadURL
+}
+
+const save = async (): Promise<void> => {
   if (!validateForm()) return
   
   loading.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800))
+    let logoUrl = formData.logo
+    
+    // If using upload method and file is selected, upload to Firebase
+    if (uploadMethod.value === 'upload' && uploadedFile.value) {
+      logoUrl = await uploadToFirebase(uploadedFile.value)
+    }
+    
+    // Simulate API call for other processing
+    await new Promise(resolve => setTimeout(resolve, 300))
     
     // Generate a unique ID
-    const brandData = {
+    const brandData: MarqueeBrandData = {
       ...formData,
+      logo: logoUrl,
       id: Date.now().toString(),
       slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       createdAt: new Date().toISOString(),
@@ -599,7 +640,7 @@ const save = async () => {
   }
 }
 
-const close = () => {
+const close = (): void => {
   if (loading.value) return
   isVisible.value = false
   setTimeout(() => {
@@ -608,12 +649,12 @@ const close = () => {
 }
 
 // Window resize handler
-const handleResize = () => {
+const handleResize = (): void => {
   windowWidth.value = window.innerWidth
 }
 
 // Keyboard event listener
-const handleKeydown = (e: KeyboardEvent) => {
+const handleKeydown = (e: KeyboardEvent): void => {
   if (e.key === 'Escape') {
     close()
   }

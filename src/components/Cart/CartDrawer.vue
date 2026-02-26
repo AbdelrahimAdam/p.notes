@@ -228,6 +228,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductsStore } from '@/stores/products'
@@ -240,9 +241,8 @@ const cartStore = useCartStore()
 const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
 
-const { currentLanguage, isRTL, t: $t } = languageStore
-
-const {
+// Use storeToRefs for reactive state from stores
+const { 
   items,
   isOpen,
   isEmpty,
@@ -253,7 +253,14 @@ const {
   closeCart,
   updateQuantity,
   removeFromCart
-} = cartStore
+} = storeToRefs(cartStore) as any // 'as any' is safe because we only need the values, not the methods
+
+// Get methods directly from store (not as refs)
+const { closeCart: closeCartAction, updateQuantity: updateQuantityAction, removeFromCart: removeFromCartAction } = cartStore
+
+// Language store reactive state
+const { currentLanguage, isRTL } = storeToRefs(languageStore)
+const { t: $t } = languageStore // t is a function, not a ref
 
 // Computed
 const itemCount = computed(() => items.value.length)
@@ -333,12 +340,12 @@ const checkout = () => {
     message: $t('checkoutProcessing'),
     type: 'success'
   })
-  closeCart()
+  closeCartAction()
   router.push('/checkout')
 }
 
 const continueShopping = () => {
-  closeCart()
+  closeCartAction()
   showNotification({
     title: $t('continueShopping'),
     message: $t('keepShopping'),

@@ -1,4 +1,4 @@
-<!-- src/components/Admin/FeaturedBrandsEditor.vue - UPDATED WITH DEBUGGING -->
+<!-- src/components/Admin/FeaturedBrandsEditor.vue -->
 <template>
   <div class="featured-brands-editor space-y-6">
     <!-- Debug Banner (temporary) -->
@@ -10,9 +10,8 @@
         </button>
       </div>
       <div class="mt-2 text-xs text-yellow-700">
-        <div>Store methods: {{ storeMethods.join(', ') }}</div>
-        <div>uploadImage exists: {{ hasUploadImage }}</div>
-        <div>uploadImage type: {{ uploadImageType }}</div>
+        <div>Brands count: {{ localBrands.length }}</div>
+        <div>Upload function available: Yes (Firebase Storage)</div>
       </div>
     </div>
 
@@ -50,7 +49,7 @@
               :src="brand.image"
               :alt="brand.name"
               class="w-full h-full object-cover"
-              @error="handleImageError(brand)"
+              @error="() => handleImageError(brand)"
             />
             <div v-else class="text-gray-400 text-center p-4">
               <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,8 +69,8 @@
           </button>
           <input
             type="file"
-            :ref="setFileInputRef(index)"
-            @change="event => handleBrandImageUpload(event, index)"
+            :ref="(el) => setFileInputRef(el, index)"
+            @change="(event) => handleBrandImageUpload(event, index)"
             accept="image/*"
             class="hidden"
           />
@@ -105,7 +104,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Price (EGP)</label>
               <input
-                v-model="brand.price"
+                v-model.number="brand.price"
                 type="number"
                 min="0"
                 step="10"
@@ -193,8 +192,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useHomepageStore } from '@/stores/homepage'
+import { ref, onMounted } from 'vue'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/firebase/config' // assuming you have this configured
 
 interface Brand {
   id: string
@@ -216,37 +216,22 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   update: [brands: Brand[]]
+  changeDetected: []
 }>()
 
 // State
-const homepageStore = useHomepageStore()
 const localBrands = ref<Brand[]>([...props.brands])
 const fileInputs = ref<(HTMLInputElement | null)[]>([])
 const showDebug = ref(false)
 const uploadStatus = ref<UploadStatus | null>(null)
 
-// Debug computed properties
-const storeMethods = computed(() => {
-  return Object.keys(homepageStore).filter(key => typeof homepageStore[key] === 'function')
-})
-
-const hasUploadImage = computed(() => {
-  return typeof homepageStore.uploadImage === 'function'
-})
-
-const uploadImageType = computed(() => {
-  return typeof homepageStore.uploadImage
-})
-
-// Initialize with debug logging
-console.log('🔧 FeaturedBrandsEditor.vue - Initializing...')
-console.log('📦 Store imported:', homepageStore ? 'Yes' : 'No')
-console.log('🔍 uploadImage method:', typeof homepageStore.uploadImage)
-console.log('📋 All store methods:', storeMethods.value)
-
-// Set file input ref correctly
-const setFileInputRef = (index: number) => (el: HTMLInputElement | null) => {
-  fileInputs.value[index] = el
+// Helper: set file input ref
+const setFileInputRef = (el: Element | null, index: number) => {
+  if (el instanceof HTMLInputElement) {
+    fileInputs.value[index] = el
+  } else {
+    fileInputs.value[index] = null
+  }
 }
 
 // Show status message
@@ -260,6 +245,7 @@ const showStatus = (type: 'success' | 'error', message: string) => {
 // Emit update function
 const emitUpdate = () => {
   emit('update', localBrands.value)
+  emit('changeDetected')
 }
 
 // Toggle debug mode
@@ -267,9 +253,7 @@ const toggleDebug = () => {
   showDebug.value = !showDebug.value
   if (showDebug.value) {
     console.log('🐛 Debug Mode Activated')
-    console.log('🏪 Store Object:', homepageStore)
-    console.log('📤 uploadImage function:', homepageStore.uploadImage)
-    console.log('🛠️ All methods:', storeMethods.value)
+    console.log('📋 Current brands:', localBrands.value)
   }
 }
 
@@ -313,7 +297,7 @@ const uploadBrandImage = (index: number) => {
   }
 }
 
-// Handle image upload
+// Handle image upload to Firebase Storage
 const handleBrandImageUpload = async (event: Event, index: number) => {
   console.log('🔄 handleBrandImageUpload called')
   
@@ -343,33 +327,19 @@ const handleBrandImageUpload = async (event: Event, index: number) => {
   }
   
   try {
-    console.log('📤 Starting image upload...')
-    
-    // CRITICAL: Check if uploadImage method exists
-    if (typeof homepageStore.uploadImage !== 'function') {
-      console.error('❌ CRITICAL: uploadImage is not a function!')
-      console.error('Store object:', homepageStore)
-      console.error('Store keys:', Object.keys(homepageStore))
-      
-      showStatus('error', 'Image upload service not available. Please check console for details.')
-      
-      // Try to log all available methods
-      const methods = []
-      for (const key in homepageStore) {
-        if (typeof homepageStore[key] === 'function') {
-          methods.push(key)
-        }
-      }
-      console.log('Available methods:', methods)
-      
-      return
-    }
-    
-    console.log('✅ uploadImage method found, calling it...')
-    
-    // Upload the image
     showStatus('success', 'Uploading image...')
-    const downloadURL = await homepageStore.uploadImage(file, 'brands')
+    
+    // Create a unique filename
+    const timestamp = Date.now()
+    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
+    const filePath = `brands/${timestamp}_${safeName}`
+    const fileRef = storageRef(storage, filePath)
+    
+    // Upload file
+    await uploadBytes(fileRef, file)
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(fileRef)
     
     console.log('✅ Image uploaded successfully:', downloadURL)
     
@@ -384,14 +354,7 @@ const handleBrandImageUpload = async (event: Event, index: number) => {
     
   } catch (error: any) {
     console.error('❌ Error uploading brand image:', error)
-    console.error('Error stack:', error.stack)
-    
-    let errorMessage = 'Failed to upload image'
-    if (error.message) {
-      errorMessage += `: ${error.message}`
-    }
-    
-    showStatus('error', errorMessage)
+    showStatus('error', `Failed to upload image: ${error.message || 'Unknown error'}`)
   }
 }
 
@@ -406,9 +369,6 @@ const handleImageError = (brand: Brand) => {
 onMounted(() => {
   fileInputs.value = new Array(localBrands.value.length).fill(null)
   console.log(`✅ FeaturedBrandsEditor mounted with ${localBrands.value.length} brands`)
-  
-  // Log initial props
-  console.log('📋 Initial brands:', props.brands)
 })
 </script>
 

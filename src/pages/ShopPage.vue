@@ -12,7 +12,7 @@
       <div v-if="productsStore.isLoading && productsStore.products.length === 0" class="py-20">
         <div class="flex flex-col items-center justify-center">
           <div class="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p class="text-gray-600">{{ currentLanguage === 'en' ? 'Loading luxury perfumes...' : 'جاري تحميل العطور الفاخرة...' }}</p>
+          <p class="text-gray-600">{{ safeLang === 'en' ? 'Loading luxury perfumes...' : 'جاري تحميل العطور الفاخرة...' }}</p>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
             </svg>
           </div>
           <h3 class="text-xl font-medium text-gray-900 mb-2">
-            {{ currentLanguage === 'en' ? 'Failed to Load Products' : 'فشل في تحميل المنتجات' }}
+            {{ safeLang === 'en' ? 'Failed to Load Products' : 'فشل في تحميل المنتجات' }}
           </h3>
           <p class="text-gray-600 mb-6">{{ productsStore.error }}</p>
           <button
@@ -34,7 +34,7 @@
             class="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 
                    transition-colors duration-200 font-medium"
           >
-            {{ currentLanguage === 'en' ? 'Retry' : 'إعادة المحاولة' }}
+            {{ safeLang === 'en' ? 'Retry' : 'إعادة المحاولة' }}
           </button>
         </div>
       </div>
@@ -45,10 +45,10 @@
         <nav class="flex items-center text-sm text-gray-600 mb-8" 
              :class="{ 'flex-row-reverse': isRTL }">
           <router-link to="/" class="hover:text-primary-600 transition-colors">
-            {{ currentLanguage === 'en' ? 'Home' : 'الرئيسية' }}
+            {{ safeLang === 'en' ? 'Home' : 'الرئيسية' }}
           </router-link>
           <span class="mx-3">/</span>
-          <span class="text-gray-900 font-medium">{{ currentLanguage === 'en' ? 'Shop All' : 'تسوق الكل' }}</span>
+          <span class="text-gray-900 font-medium">{{ safeLang === 'en' ? 'Shop All' : 'تسوق الكل' }}</span>
         </nav>
 
         <!-- Search Bar -->
@@ -58,7 +58,7 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                :placeholder="currentLanguage === 'en' ? 'Search perfumes by name, brand, or notes...' : 'ابحث عن العطور بالاسم، الماركة، أو النوتات...'"
+                :placeholder="safeLang === 'en' ? 'Search perfumes by name, brand, or notes...' : 'ابحث عن العطور بالاسم، الماركة، أو النوتات...'"
                 class="w-full px-6 py-4 pl-12 pr-12 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none transition-all duration-200"
                 @input="handleSearch"
               />
@@ -81,7 +81,7 @@
             <!-- Search Results Info -->
             <div v-if="searchQuery && filteredProducts.length > 0" class="mt-3 text-sm text-gray-600">
               <p>
-                {{ currentLanguage === 'en' 
+                {{ safeLang === 'en' 
                    ? `Found ${filteredProducts.length} products for "${searchQuery}"`
                    : `تم العثور على ${filteredProducts.length} منتج لـ "${searchQuery}"` }}
               </p>
@@ -99,7 +99,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              {{ currentLanguage === 'en' ? 'Filters' : 'الفلاتر' }}
+              {{ safeLang === 'en' ? 'Filters' : 'الفلاتر' }}
               <span v-if="activeFilters.length > 0" class="bg-primary-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                 {{ activeFilters.length }}
               </span>
@@ -114,7 +114,7 @@
                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                {{ currentLanguage === 'en' ? 'Clear' : 'مسح' }}
+                {{ safeLang === 'en' ? 'Clear' : 'مسح' }}
               </button>
             </div>
           </div>
@@ -126,11 +126,11 @@
                    focus:ring-primary-500 focus:border-transparent bg-white"
             @change="handleSortChange"
           >
-            <option value="newest">{{ currentLanguage === 'en' ? 'Newest' : 'الأحدث' }}</option>
-            <option value="price-low">{{ currentLanguage === 'en' ? 'Price ↑' : 'السعر ↑' }}</option>
-            <option value="price-high">{{ currentLanguage === 'en' ? 'Price ↓' : 'السعر ↓' }}</option>
-            <option value="rating">{{ currentLanguage === 'en' ? 'Top Rated' : 'الأعلى تقييماً' }}</option>
-            <option value="best-selling">{{ currentLanguage === 'en' ? 'Best Selling' : 'الأفضل مبيعاً' }}</option>
+            <option value="newest">{{ safeLang === 'en' ? 'Newest' : 'الأحدث' }}</option>
+            <option value="price-low">{{ safeLang === 'en' ? 'Price ↑' : 'السعر ↑' }}</option>
+            <option value="price-high">{{ safeLang === 'en' ? 'Price ↓' : 'السعر ↓' }}</option>
+            <option value="rating">{{ safeLang === 'en' ? 'Top Rated' : 'الأعلى تقييماً' }}</option>
+            <option value="best-selling">{{ safeLang === 'en' ? 'Best Selling' : 'الأفضل مبيعاً' }}</option>
           </select>
         </div>
 
@@ -147,7 +147,7 @@
           >
             <!-- Mobile filter header -->
             <div v-if="showMobileFilters" class="flex items-center justify-between mb-6 lg:hidden">
-              <h2 class="text-xl font-bold">{{ currentLanguage === 'en' ? 'Filters' : 'الفلاتر' }}</h2>
+              <h2 class="text-xl font-bold">{{ safeLang === 'en' ? 'Filters' : 'الفلاتر' }}</h2>
               <button 
                 @click="showMobileFilters = false"
                 class="p-2 hover:bg-gray-100 rounded-lg"
@@ -161,7 +161,7 @@
             <!-- Categories -->
             <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h3 class="font-medium text-gray-900 mb-3">
-                {{ currentLanguage === 'en' ? 'Categories' : 'الفئات' }}
+                {{ safeLang === 'en' ? 'Categories' : 'الفئات' }}
               </h3>
               <div class="space-y-1">
                 <button
@@ -174,7 +174,7 @@
                   ]"
                   :style="{ direction: isRTL ? 'rtl' : 'ltr' }"
                 >
-                  {{ currentLanguage === 'en' ? 'All Categories' : 'جميع الفئات' }}
+                  {{ safeLang === 'en' ? 'All Categories' : 'جميع الفئات' }}
                 </button>
                 <button
                   v-for="category in productsStore.categories"
@@ -188,7 +188,7 @@
                   ]"
                   :style="{ direction: isRTL ? 'rtl' : 'ltr' }"
                 >
-                  {{ category[currentLanguage] }}
+                  {{ getCategoryName(category) }}
                 </button>
               </div>
             </div>
@@ -196,7 +196,7 @@
             <!-- NEW: Gender Filter Section -->
             <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h3 class="font-medium text-gray-900 mb-3">
-                {{ currentLanguage === 'en' ? 'Gender' : 'الجنس' }}
+                {{ safeLang === 'en' ? 'Gender' : 'الجنس' }}
               </h3>
               <div class="space-y-1">
                 <button
@@ -208,7 +208,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'All' : 'الكل' }}
+                  {{ safeLang === 'en' ? 'All' : 'الكل' }}
                 </button>
                 <button
                   @click="updateFilter('classification', 'M')"
@@ -219,7 +219,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'Men' : 'رجال' }}
+                  {{ safeLang === 'en' ? 'Men' : 'رجال' }}
                 </button>
                 <button
                   @click="updateFilter('classification', 'F')"
@@ -230,7 +230,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'Women' : 'نساء' }}
+                  {{ safeLang === 'en' ? 'Women' : 'نساء' }}
                 </button>
                 <button
                   @click="updateFilter('classification', 'U')"
@@ -241,7 +241,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'Unisex' : 'للجنسين' }}
+                  {{ safeLang === 'en' ? 'Unisex' : 'للجنسين' }}
                 </button>
               </div>
             </div>
@@ -249,7 +249,7 @@
             <!-- Price Range -->
             <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h3 class="font-medium text-gray-900 mb-3">
-                {{ currentLanguage === 'en' ? 'Price Range' : 'نطاق السعر' }}
+                {{ safeLang === 'en' ? 'Price Range' : 'نطاق السعر' }}
               </h3>
               <div class="space-y-1">
                 <button
@@ -261,11 +261,11 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'All Prices' : 'جميع الأسعار' }}
+                  {{ safeLang === 'en' ? 'All Prices' : 'جميع الأسعار' }}
                 </button>
                 <button
                   v-for="range in priceRanges"
-                  :key="range.label[currentLanguage]"
+                  :key="getLocalizedLabel(range.label)"
                   @click="updatePriceRange(range)"
                   :class="[
                     'w-full text-left px-3 py-2 rounded transition-all duration-200 text-sm',
@@ -274,7 +274,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ range.label[currentLanguage] }}
+                  {{ getLocalizedLabel(range.label) }}
                 </button>
               </div>
             </div>
@@ -282,7 +282,7 @@
             <!-- Additional Filters -->
             <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h3 class="font-medium text-gray-900 mb-3">
-                {{ currentLanguage === 'en' ? 'Additional Filters' : 'خيارات إضافية' }}
+                {{ safeLang === 'en' ? 'Additional Filters' : 'خيارات إضافية' }}
               </h3>
               <div class="space-y-2">
                 <button
@@ -294,7 +294,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'Best Sellers' : 'الأفضل مبيعاً' }}
+                  {{ safeLang === 'en' ? 'Best Sellers' : 'الأفضل مبيعاً' }}
                 </button>
 
                 <button
@@ -306,7 +306,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'New Arrivals' : 'الوصلات الجديدة' }}
+                  {{ safeLang === 'en' ? 'New Arrivals' : 'الوصلات الجديدة' }}
                 </button>
 
                 <button
@@ -318,7 +318,7 @@
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  {{ currentLanguage === 'en' ? 'Featured' : 'مميز' }}
+                  {{ safeLang === 'en' ? 'Featured' : 'مميز' }}
                 </button>
               </div>
             </div>
@@ -330,7 +330,7 @@
                      border border-gray-300 rounded-lg hover:border-primary-500 
                      transition-all duration-200 text-sm font-medium"
             >
-              {{ currentLanguage === 'en' ? 'Clear All Filters' : 'مسح جميع الفلاتر' }}
+              {{ safeLang === 'en' ? 'Clear All Filters' : 'مسح جميع الفلاتر' }}
             </button>
 
             <!-- Close button for mobile -->
@@ -340,7 +340,7 @@
                 class="w-full px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 
                        transition-colors duration-200 font-medium"
               >
-                {{ currentLanguage === 'en' ? 'Show Products' : 'عرض المنتجات' }}
+                {{ safeLang === 'en' ? 'Show Products' : 'عرض المنتجات' }}
               </button>
             </div>
           </div>
@@ -351,11 +351,11 @@
             <div class="hidden lg:flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
                 <h2 class="text-2xl font-bold text-gray-900">
-                  {{ currentLanguage === 'en' ? 'All Products' : 'جميع المنتجات' }}
+                  {{ safeLang === 'en' ? 'All Products' : 'جميع المنتجات' }}
                   <span class="text-primary-500">({{ filteredProducts.length }})</span>
                 </h2>
                 <p class="text-gray-600 mt-1">
-                  {{ currentLanguage === 'en' 
+                  {{ safeLang === 'en' 
                      ? `Showing ${Math.min(visibleCount, filteredProducts.length)} of ${filteredProducts.length} products` 
                      : `عرض ${Math.min(visibleCount, filteredProducts.length)} من أصل ${filteredProducts.length} منتج` }}
                 </p>
@@ -370,7 +370,7 @@
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    {{ currentLanguage === 'en' ? 'Clear' : 'مسح' }}
+                    {{ safeLang === 'en' ? 'Clear' : 'مسح' }}
                   </button>
                 </div>
               </div>
@@ -382,14 +382,14 @@
                          focus:ring-primary-500 focus:border-transparent bg-white"
                   @change="handleSortChange"
                 >
-                  <option value="newest">{{ currentLanguage === 'en' ? 'Newest First' : 'الأحدث أولاً' }}</option>
-                  <option value="price-low">{{ currentLanguage === 'en' ? 'Price: Low to High' : 'السعر: منخفض إلى مرتفع' }}</option>
-                  <option value="price-high">{{ currentLanguage === 'en' ? 'Price: High to Low' : 'السعر: مرتفع إلى منخفض' }}</option>
-                  <option value="rating">{{ currentLanguage === 'en' ? 'Highest Rated' : 'الأعلى تقييماً' }}</option>
-                  <option value="name-asc">{{ currentLanguage === 'en' ? 'Name: A-Z' : 'الاسم: أ-ي' }}</option>
-                  <option value="name-desc">{{ currentLanguage === 'en' ? 'Name: Z-A' : 'الاسم: ي-أ' }}</option>
-                  <option value="popular">{{ currentLanguage === 'en' ? 'Most Popular' : 'الأكثر شعبية' }}</option>
-                  <option value="best-selling">{{ currentLanguage === 'en' ? 'Best Selling' : 'الأفضل مبيعاً' }}</option>
+                  <option value="newest">{{ safeLang === 'en' ? 'Newest First' : 'الأحدث أولاً' }}</option>
+                  <option value="price-low">{{ safeLang === 'en' ? 'Price: Low to High' : 'السعر: منخفض إلى مرتفع' }}</option>
+                  <option value="price-high">{{ safeLang === 'en' ? 'Price: High to Low' : 'السعر: مرتفع إلى منخفض' }}</option>
+                  <option value="rating">{{ safeLang === 'en' ? 'Highest Rated' : 'الأعلى تقييماً' }}</option>
+                  <option value="name-asc">{{ safeLang === 'en' ? 'Name: A-Z' : 'الاسم: أ-ي' }}</option>
+                  <option value="name-desc">{{ safeLang === 'en' ? 'Name: Z-A' : 'الاسم: ي-أ' }}</option>
+                  <option value="popular">{{ safeLang === 'en' ? 'Most Popular' : 'الأكثر شعبية' }}</option>
+                  <option value="best-selling">{{ safeLang === 'en' ? 'Best Selling' : 'الأفضل مبيعاً' }}</option>
                 </select>
               </div>
             </div>
@@ -398,7 +398,7 @@
             <div v-if="productsStore.isFetchingMore" class="text-center py-8">
               <div class="inline-flex items-center text-primary-500">
                 <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span>{{ currentLanguage === 'en' ? 'Loading more products...' : 'جاري تحميل المزيد من المنتجات...' }}</span>
+                <span>{{ safeLang === 'en' ? 'Loading more products...' : 'جاري تحميل المزيد من المنتجات...' }}</span>
               </div>
             </div>
 
@@ -425,11 +425,11 @@
                   <template v-if="productsStore.isFetchingMore">
                     <div class="inline-flex items-center">
                       <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      {{ currentLanguage === 'en' ? 'Loading...' : 'جاري التحميل...' }}
+                      {{ safeLang === 'en' ? 'Loading...' : 'جاري التحميل...' }}
                     </div>
                   </template>
                   <template v-else>
-                    {{ currentLanguage === 'en' ? 'Load More Products' : 'تحميل المزيد من المنتجات' }}
+                    {{ safeLang === 'en' ? 'Load More Products' : 'تحميل المزيد من المنتجات' }}
                   </template>
                 </button>
               </div>
@@ -437,7 +437,7 @@
               <!-- End of Results -->
               <div v-else-if="filteredProducts.length > 0 && !productsStore.hasMore" class="text-center mt-12 pt-8 border-t border-gray-200">
                 <p class="text-gray-600">
-                  {{ currentLanguage === 'en' 
+                  {{ safeLang === 'en' 
                      ? `You've viewed all ${filteredProducts.length} products` 
                      : `لقد شاهدت جميع المنتجات البالغ عددها ${filteredProducts.length} منتج` }}
                 </p>
@@ -453,16 +453,16 @@
                 </svg>
               </div>
               <h3 class="text-xl font-medium text-gray-900 mb-2">
-                {{ currentLanguage === 'en' ? 'No Products Found' : 'لم يتم العثور على منتجات' }}
+                {{ safeLang === 'en' ? 'No Products Found' : 'لم يتم العثور على منتجات' }}
               </h3>
               <p class="text-gray-600 mb-6">
                 <template v-if="searchQuery">
-                  {{ currentLanguage === 'en' 
+                  {{ safeLang === 'en' 
                      ? `No products found for "${searchQuery}". Try adjusting your search or filters.` 
                      : `لم يتم العثور على منتجات لـ "${searchQuery}". حاول تعديل البحث أو الفلاتر.` }}
                 </template>
                 <template v-else>
-                  {{ currentLanguage === 'en' 
+                  {{ safeLang === 'en' 
                      ? 'Try adjusting your filters or browse all categories.' 
                      : 'حاول تعديل الفلاتر أو تصفح جميع الفئات.' }}
                 </template>
@@ -471,7 +471,7 @@
                 @click="clearFilters"
                 class="text-primary-600 hover:text-primary-700 font-medium underline"
               >
-                {{ currentLanguage === 'en' ? 'Clear All Filters' : 'مسح جميع الفلاتر' }}
+                {{ safeLang === 'en' ? 'Clear All Filters' : 'مسح جميع الفلاتر' }}
               </button>
             </div>
           </div>
@@ -489,14 +489,31 @@ import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import ProductGrid from '@/components/Products/ProductGrid.vue'
 import SEOHead from '@/components/UI/SEOHead.vue'
-import type { Product, FilterOptions } from '@/types'
+import type { Product, FilterOptions, Category } from '@/types'
 
 const router = useRouter()
 const languageStore = useLanguageStore()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 
-const { currentLanguage, isRTL } = languageStore
+const { isRTL } = languageStore
+const currentLanguage = computed(() => languageStore.currentLanguage)
+
+// Safe language for indexing (only 'en' or 'ar')
+const safeLang = computed(() => {
+  const lang = currentLanguage.value
+  return lang === 'en' || lang === 'ar' ? lang : 'en'
+})
+
+// Helper to get localized name from a category
+const getCategoryName = (category: Category): string => {
+  return category[safeLang.value] || category.id
+}
+
+// Helper to get localized label from a translation object
+const getLocalizedLabel = (label: { en: string; ar: string }): string => {
+  return label[safeLang.value]
+}
 
 // Refs
 const sidebarRef = ref<HTMLElement>()
@@ -557,7 +574,7 @@ const activeFilters = computed(() => {
     const category = productsStore.getCategoryById(filters.value.category)
     if (category) {
       active.push({ 
-        label: `${currentLanguage === 'en' ? 'Category' : 'الفئة'}: ${category[currentLanguage]}`, 
+        label: `${safeLang.value === 'en' ? 'Category' : 'الفئة'}: ${getCategoryName(category)}`, 
         value: filters.value.category 
       })
     }
@@ -565,12 +582,12 @@ const activeFilters = computed(() => {
   
   if (filters.value.classification) {
     const genderMap: Record<string, string> = {
-      M: currentLanguage === 'en' ? 'Men' : 'رجال',
-      F: currentLanguage === 'en' ? 'Women' : 'نساء',
-      U: currentLanguage === 'en' ? 'Unisex' : 'للجنسين'
+      M: safeLang.value === 'en' ? 'Men' : 'رجال',
+      F: safeLang.value === 'en' ? 'Women' : 'نساء',
+      U: safeLang.value === 'en' ? 'Unisex' : 'للجنسين'
     }
     active.push({ 
-      label: `${currentLanguage === 'en' ? 'Gender' : 'الجنس'}: ${genderMap[filters.value.classification] || filters.value.classification}`, 
+      label: `${safeLang.value === 'en' ? 'Gender' : 'الجنس'}: ${genderMap[filters.value.classification] || filters.value.classification}`, 
       value: filters.value.classification 
     })
   }
@@ -580,28 +597,28 @@ const activeFilters = computed(() => {
     const max = filters.value.maxPrice ?? Infinity
     const range = priceRanges.find(r => r.min === min && r.max === max)
     active.push({ 
-      label: range ? range.label[currentLanguage] : `${currentLanguage === 'en' ? 'Price' : 'السعر'}: ${formatPrice(min)} - ${max === Infinity ? '∞' : formatPrice(max)} EGP`, 
+      label: range ? getLocalizedLabel(range.label) : `${safeLang.value === 'en' ? 'Price' : 'السعر'}: ${formatPrice(min)} - ${max === Infinity ? '∞' : formatPrice(max)} EGP`, 
       value: { min, max } 
     })
   }
   
   if (filters.value.bestseller) {
     active.push({ 
-      label: currentLanguage === 'en' ? 'Best Sellers' : 'الأفضل مبيعاً', 
+      label: safeLang.value === 'en' ? 'Best Sellers' : 'الأفضل مبيعاً', 
       value: true 
     })
   }
   
   if (filters.value.newArrival) {
     active.push({ 
-      label: currentLanguage === 'en' ? 'New Arrivals' : 'الوصلات الجديدة', 
+      label: safeLang.value === 'en' ? 'New Arrivals' : 'الوصلات الجديدة', 
       value: true 
     })
   }
   
   if (filters.value.isFeatured) {
     active.push({ 
-      label: currentLanguage === 'en' ? 'Featured' : 'مميز', 
+      label: safeLang.value === 'en' ? 'Featured' : 'مميز', 
       value: true 
     })
   }
@@ -756,16 +773,16 @@ watch(filters, (newFilters) => {
 
 let filterTimeout: NodeJS.Timeout
 
-// Watch for store filters to trigger fetch
+// Watch for store filters to sync local filters
 watch(
   () => productsStore.filters,
   (newStoreFilters) => {
     // Sync local filters with store filters
     if (!isInitialLoad.value) {
       Object.keys(newStoreFilters).forEach(key => {
-        if (filters.value[key as keyof FilterOptions] !== newStoreFilters[key as keyof FilterOptions]) {
-          filters.value[key as keyof FilterOptions] = newStoreFilters[key as keyof FilterOptions]
-        }
+        const filterKey = key as keyof FilterOptions
+        // Use type assertion to safely assign (we know the values are compatible)
+        ;(filters.value as any)[filterKey] = newStoreFilters[filterKey]
       })
     }
   },

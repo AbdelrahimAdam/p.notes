@@ -90,7 +90,7 @@
                     :src="offer.imageUrl"
                     :alt="offer.title"
                     class="w-full h-full object-contain p-4"
-                    @error="handleImageError(offer)"
+                    @error="() => handleImageError(offer)"
                   />
                 </div>
                 
@@ -101,8 +101,8 @@
                   </label>
                   <input
                     type="file"
-                    :ref="el => fileInputs[index] = el"
-                    @change="event => handleImageUpload(event, index)"
+                    :ref="(el) => setFileInputRef(el, index)"
+                    @change="(event) => handleImageUpload(event, index)"
                     accept="image/*"
                     class="hidden"
                   />
@@ -197,7 +197,7 @@
                     </label>
                     <div class="relative">
                       <input
-                        v-model="offer.oldPrice"
+                        v-model.number="offer.oldPrice"
                         type="number"
                         min="0"
                         step="0.01"
@@ -216,7 +216,7 @@
                     </label>
                     <div class="relative">
                       <input
-                        v-model="offer.newPrice"
+                        v-model.number="offer.newPrice"
                         type="number"
                         min="0"
                         step="0.01"
@@ -345,38 +345,51 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/firebase/config' // Adjust path if needed
 import { useLanguageStore } from '@/stores/language'
-import { useHomepageStore } from '@/stores/homepage'
+
+// Define offer type
+interface Offer {
+  id: string
+  title: string
+  imageUrl: string
+  subtitle: string
+  oldPrice: number
+  newPrice: number
+  slug: string
+  isActive?: boolean
+}
 
 const props = defineProps<{
-  offers: Array<{
-    id: string
-    title: string
-    imageUrl: string
-    subtitle: string
-    oldPrice: number
-    newPrice: number
-    slug: string
-    isActive?: boolean
-  }>
+  offers: Offer[]
 }>()
 
 const emit = defineEmits<{
-  update: [offers: any[]]
+  update: [offers: Offer[]]
   'change-detected': []
 }>()
 
 const languageStore = useLanguageStore()
-const homepageStore = useHomepageStore()
 const { t } = languageStore
 
 // Local data
-const offersData = ref([...props.offers.map(offer => ({
+const offersData = ref<Offer[]>(props.offers.map(offer => ({
   ...offer,
   isActive: offer.isActive !== false // Default to active
-}))])
+})))
 
 const fileInputs = ref<(HTMLInputElement | null)[]>([])
+
+// Helper to set file input refs (accepts Vue component instance or element)
+const setFileInputRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (el instanceof HTMLInputElement) {
+    fileInputs.value[index] = el
+  } else {
+    fileInputs.value[index] = null
+  }
+}
 
 // Methods
 const updateOffer = (index: number) => {
@@ -385,7 +398,7 @@ const updateOffer = (index: number) => {
 }
 
 const addOffer = () => {
-  const newOffer = {
+  const newOffer: Offer = {
     id: `offer-${Date.now()}`,
     title: '',
     imageUrl: '',
@@ -397,6 +410,7 @@ const addOffer = () => {
   }
 
   offersData.value.push(newOffer)
+  fileInputs.value.push(null)
   updateOffer(offersData.value.length - 1)
 }
 
@@ -408,6 +422,7 @@ const removeOffer = (index: number) => {
 
   if (confirm(t('Are you sure you want to remove this offer?'))) {
     offersData.value.splice(index, 1)
+    fileInputs.value.splice(index, 1)
     updateOffer(index)
   }
 }
@@ -418,9 +433,7 @@ const toggleActive = (index: number) => {
 }
 
 const uploadOfferImage = (index: number) => {
-  if (fileInputs.value[index]) {
-    fileInputs.value[index]?.click()
-  }
+  fileInputs.value[index]?.click()
 }
 
 const handleImageUpload = async (event: Event, index: number) => {
@@ -441,8 +454,17 @@ const handleImageUpload = async (event: Event, index: number) => {
   }
 
   try {
-    // Upload to Firebase
-    const downloadURL = await homepageStore.uploadImage(file, 'offers')
+    // Create unique filename
+    const timestamp = Date.now()
+    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
+    const filePath = `offers/${timestamp}_${safeName}`
+    const fileRef = storageRef(storage, filePath)
+    
+    // Upload file
+    await uploadBytes(fileRef, file)
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(fileRef)
     
     // Update offer image
     offersData.value[index].imageUrl = downloadURL
@@ -454,27 +476,121 @@ const handleImageUpload = async (event: Event, index: number) => {
   }
 }
 
-const handleImageError = (offer: any) => {
-  console.warn('Image failed to load')
+const handleImageError = (offer: Offer) => {
+  console.warn('Image failed to load for offer:', offer.id)
   offer.imageUrl = '/images/default-offer.jpg'
-  const index = offersData.value.findIndex(o => o.id === offer.id)
-  if (index !== -1) {
-    updateOffer(index)
+  const idx = offersData.value.findIndex(o => o.id === offer.id)
+  if (idx !== -1) {
+    updateOffer(idx)
   }
 }
 
-const calculateDiscount = (oldPrice: number, newPrice: number) => {
+const calculateDiscount = (oldPrice: number, newPrice: number): number => {
   if (oldPrice <= 0 || newPrice >= oldPrice) return 0
   return Math.round(((oldPrice - newPrice) / oldPrice) * 100)
 }
 
-const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-EG').format(amount)
 }
 </script>
 
 <style scoped>
+/* Base styles */
 .offers-editor {
   min-height: 500px;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+  .offers-editor .grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .offers-editor .p-6 {
+    padding: 1rem;
+  }
+  
+  /* Stack columns on mobile */
+  .offers-editor .grid-cols-1.lg\:grid-cols-3 > * {
+    width: 100%;
+  }
+  
+  /* Better touch targets */
+  .offers-editor button,
+  .offers-editor input {
+    min-height: 44px;
+  }
+  
+  /* Adjust preview section */
+  .offers-editor .bg-red-50 .text-2xl {
+    font-size: 1.5rem;
+  }
+}
+
+/* Custom scrollbar for better UX */
+.offers-editor *::-webkit-scrollbar {
+  width: 6px;
+}
+
+.offers-editor *::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.offers-editor *::-webkit-scrollbar-thumb {
+  background: #d4af37;
+  border-radius: 3px;
+}
+
+.offers-editor *::-webkit-scrollbar-thumb:hover {
+  background: #b8941f;
+}
+
+/* Smooth transitions */
+.offers-editor * {
+  transition: all 0.2s ease;
+}
+
+/* Focus styles */
+.offers-editor input:focus,
+.offers-editor button:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #d4af37;
+}
+
+/* Image hover effect */
+.offers-editor img {
+  transition: transform 0.3s ease;
+}
+
+.offers-editor img:hover {
+  transform: scale(1.02);
+}
+
+/* Ensure preview button doesn't overflow */
+.offers-editor .w-fit {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 480px) {
+  .offers-editor .bg-red-50 .flex {
+    flex-wrap: wrap;
+  }
+  
+  .offers-editor .bg-red-50 .gap-3 {
+    gap: 0.5rem;
+  }
+  
+  .offers-editor .text-2xl {
+    font-size: 1.25rem;
+  }
 }
 </style>

@@ -16,7 +16,7 @@ const publicRoutes = [
   'checkout',
   'contact',
   'about',
-  'wishlist',  // 👈 ADD WISHLIST HERE
+  'wishlist',
   'not-found'
 ]
 
@@ -42,7 +42,7 @@ const adminRoutes = [
 // Auth guard for protected routes (requires authentication)
 export const authGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
+  _from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   const authStore = useAuthStore()
@@ -61,13 +61,13 @@ export const authGuard = async (
     console.log('🔐 Admin route - checking authentication')
     
     // Check authentication status
-    if (!authStore.isAuthenticated.value) {
+    if (!authStore.isAuthenticated) {
       console.log('🔐 Not authenticated, checking auth...')
       await authStore.checkAuth()
     }
 
     // If still not authenticated, redirect to login
-    if (!authStore.isAuthenticated.value) {
+    if (!authStore.isAuthenticated) {
       console.log('🚫 Not authenticated, redirecting to login')
       next({
         name: 'admin-login',
@@ -80,7 +80,7 @@ export const authGuard = async (
     }
 
     // Check if route requires admin access
-    if (to.meta.requiresAdmin && !authStore.isAdmin.value && !authStore.isSuperAdmin.value) {
+    if (to.meta.requiresAdmin && !authStore.isAdmin && !authStore.isSuperAdmin) {
       console.log('🚫 Admin access required but user is not admin')
       next({
         name: 'admin-login',
@@ -93,7 +93,7 @@ export const authGuard = async (
     }
 
     // Check if route requires super admin access
-    if (to.meta.requiresSuperAdmin && !authStore.isSuperAdmin.value) {
+    if (to.meta.requiresSuperAdmin && !authStore.isSuperAdmin) {
       console.log('🚫 Super admin access required but user is not super admin')
       next({
         name: 'admin-dashboard',
@@ -116,7 +116,7 @@ export const authGuard = async (
 // Guest guard for login page (prevent access if already logged in)
 export const guestGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
+  _from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   const authStore = useAuthStore()
@@ -124,12 +124,12 @@ export const guestGuard = async (
   console.log('🛡️ Guest guard triggered for:', to.path)
   
   // Check current authentication status
-  if (!authStore.isAuthenticated.value) {
+  if (!authStore.isAuthenticated) {
     await authStore.checkAuth()
   }
 
   // If already authenticated as admin or super admin, redirect to dashboard
-  if (authStore.isAuthenticated.value && (authStore.isAdmin.value || authStore.isSuperAdmin.value)) {
+  if (authStore.isAuthenticated && (authStore.isAdmin || authStore.isSuperAdmin)) {
     console.log('✅ Already logged in as admin, redirecting to dashboard')
     next({ name: 'admin-dashboard' })
   } else {
@@ -141,18 +141,18 @@ export const guestGuard = async (
 // Admin guard (super-admin only) - kept for backward compatibility
 export const adminGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
+  _from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   const authStore = useAuthStore()
 
   console.log('🛡️ Admin guard triggered for:', to.path)
   
-  if (!authStore.isAuthenticated.value) {
+  if (!authStore.isAuthenticated) {
     await authStore.checkAuth()
   }
 
-  if (authStore.isAuthenticated.value && authStore.isSuperAdmin.value) {
+  if (authStore.isAuthenticated && authStore.isSuperAdmin) {
     console.log('✅ Super-admin access granted')
     next()
   } else {
@@ -170,7 +170,7 @@ export const adminGuard = async (
 // SEO guard to update meta tags (should run for ALL routes)
 export const seoGuard = (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
+  _from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   updateMetaTags(to)

@@ -494,10 +494,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useLanguageStore } from '@/stores/language'
 import { useCartStore } from '@/stores/cart'
 import { useOrdersStore } from '@/stores/orders'
-import { useAuthStore } from '@/stores/auth'
 import SEOHead from '@/components/UI/SEOHead.vue'
 import { authNotification } from '@/utils/notifications'
 
@@ -505,9 +505,9 @@ const router = useRouter()
 const languageStore = useLanguageStore()
 const cartStore = useCartStore()
 const ordersStore = useOrdersStore()
-const authStore = useAuthStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+// Use storeToRefs to get properly typed refs
+const { currentLanguage, isRTL } = storeToRefs(languageStore)
 
 // State
 const loading = ref(false)
@@ -546,10 +546,6 @@ const shippingProgress = computed(() => cartStore.getFreeShippingProgress())
 const savings = computed(() => cartStore.calculateSavings())
 
 // Methods
-const formatPrice = (price: number) => {
-  return cartStore.formatPrice(price)
-}
-
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
   img.src = '/images/default-product.jpg'

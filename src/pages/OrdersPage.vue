@@ -348,10 +348,10 @@ const guestOrderLoading = ref(false)
 const guestOrder = ref<any>(null)
 const guestOrderError = ref('')
 
-// Get the current user ID based on user type
+// Get the current user ID based on user type (using uid)
 const getCurrentUserId = computed(() => {
   if (authStore.isCustomer) {
-    return authStore.customer?.id
+    return authStore.customer?.uid
   }
   return null
 })
@@ -423,7 +423,10 @@ const handleCancelOrder = async (order: any) => {
   })
   
   if (confirmed) {
-    await ordersStore.cancelOrder(order.id)
+    const success = await ordersStore.cancelOrder(order.id)
+    if (!success) {
+      // Optionally show error message
+    }
   }
 }
 
@@ -547,7 +550,7 @@ onMounted(async () => {
   
   // Load customer orders if authenticated
   if (authStore.isCustomer) {
-    const userId = authStore.customer?.id
+    const userId = authStore.customer?.uid
     if (userId) {
       await ordersStore.fetchOrders({ userId })
       await ordersStore.getOrderStats()

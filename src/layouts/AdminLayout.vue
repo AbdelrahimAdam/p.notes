@@ -297,6 +297,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
 import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
@@ -307,7 +308,9 @@ const route = useRoute()
 const authStore = useAuthStore()
 const languageStore = useLanguageStore()
 
-const { t, currentLanguage } = languageStore
+// Use storeToRefs for reactive refs
+const { currentLanguage } = storeToRefs(languageStore)
+const { t } = languageStore
 
 // State
 const isMobileMenuOpen = ref(false)
@@ -345,7 +348,9 @@ const pageDescription = computed(() => {
   const description = route.meta?.description
   if (!description) return ''
   if (typeof description === 'string') return description
-  return description[currentLanguage.value] || description.en || ''
+  // description is an object with en/ar
+  const lang = currentLanguage.value === 'en' || currentLanguage.value === 'ar' ? currentLanguage.value : 'en'
+  return description[lang] || description.en || ''
 })
 
 const currentYear = computed(() => new Date().getFullYear())
@@ -418,24 +423,29 @@ const formatTimeAgo = (date: Date) => {
   const diffDays = Math.floor(diffMs / 86400000)
 
   if (diffMins < 1) return t('Just now')
-  if (diffMins < 60) return t('{{minutes}} minutes ago', { minutes: diffMins })
-  if (diffHours < 24) return t('{{hours}} hours ago', { hours: diffHours })
+  if (diffMins < 60) return t('{{minutes}} minutes ago', { minutes: diffMins.toString() })
+  if (diffHours < 24) return t('{{hours}} hours ago', { hours: diffHours.toString() })
   if (diffDays === 1) return t('Yesterday')
-  return t('{{days}} days ago', { days: diffDays })
+  return t('{{days}} days ago', { days: diffDays.toString() })
 }
 
 // Click outside directive
 const vClickOutside = {
-  mounted(el: HTMLElement, binding: any) {
-    el.clickOutsideEvent = (event: Event) => {
+  mounted(el: HTMLElement, binding: { value: () => void }) {
+    // Store handler for cleanup
+    const handler = (event: Event) => {
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value()
       }
     }
-    document.addEventListener('click', el.clickOutsideEvent)
+    (el as any).__clickOutsideHandler = handler
+    document.addEventListener('click', handler)
   },
   unmounted(el: HTMLElement) {
-    document.removeEventListener('click', el.clickOutsideEvent)
+    const handler = (el as any).__clickOutsideHandler
+    if (handler) {
+      document.removeEventListener('click', handler)
+    }
   }
 }
 
@@ -457,17 +467,9 @@ onMounted(() => {
   
   window.addEventListener('resize', handleResize)
   
-  // Close dropdowns on route change
-  const unwatch = router.afterEach(() => {
-    isMobileMenuOpen.value = false
-    showNotifications.value = false
-    showUserMenu.value = false
-  })
-  
-  // Cleanup
+  // Cleanup will be done in onUnmounted
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
-    unwatch()
   })
 })
 

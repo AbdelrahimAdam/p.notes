@@ -348,7 +348,7 @@
         <router-view v-slot="{ Component, route }">
           <!-- Page Transitions -->
           <transition
-            :name="route.meta.transition || 'fade'"
+            :name="transitionName"
             mode="out-in"
             @before-enter="beforeEnter"
             @after-enter="afterEnter"
@@ -405,7 +405,7 @@ import SEOHead from '@/components/UI/SEOHead.vue'
 import LuxuryHeader from '@/components/Layout/LuxuryHeader.vue'
 import LuxuryFooter from '@/components/Layout/LuxuryFooter.vue'
 import LuxuryCartSidebar from '@/components/Cart/LuxuryCartSidebar.vue'
-import LuxurySearchModal from '@/components/Search/SearchModal.vue'
+import LuxurySearchModal from '@/components/search/SearchModal.vue' // ✅ Fixed casing
 import LuxuryNotificationCenter from '@/components/UI/LuxuryNotificationCenter.vue'
 import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
 
@@ -450,6 +450,18 @@ const SCROLL_THROTTLE_MS = 16 // ~60fps
 // Computed properties
 const routeLayout = computed(() => {
   return route.meta.layout || 'default'
+})
+
+// Helper to get safe language for indexing (only 'en' or 'ar')
+const safeLanguage = computed(() => {
+  const lang = currentLanguage.value
+  return (lang === 'en' || lang === 'ar') ? lang : 'en'
+})
+
+// Computed transition name (ensures it's a string)
+const transitionName = computed(() => {
+  const metaTransition = route.meta.transition
+  return typeof metaTransition === 'string' ? metaTransition : 'fade'
 })
 
 // Helper to check if current route is public
@@ -518,7 +530,12 @@ const adminPageDescription = computed(() => {
   const description = route.meta?.description
   if (!description) return ''
   if (typeof description === 'string') return description
-  return description[currentLanguage.value] || description.en || ''
+  // Check if description is an object with en/ar properties
+  if (typeof description === 'object' && description !== null && 'en' in description) {
+    const descObj = description as { en: string; ar?: string }
+    return descObj[safeLanguage.value] || descObj.en || ''
+  }
+  return ''
 })
 
 const currentYear = computed(() => new Date().getFullYear())
@@ -553,39 +570,20 @@ const appTranslations = {
   'days ago': { en: 'days ago', ar: 'أيام مضت' }
 }
 
-// Safe translate function
+// Safe translate function - simplified, no dependency on languageStore.t
 const safeTranslate = (key: string | { [key: string]: string } | undefined): string => {
   if (!key) return ''
   
-  try {
-    if (typeof key === 'string') {
-      const translations = appTranslations[key as keyof typeof appTranslations]
-      if (translations) {
-        // Use languageStore.t if available, else fallback to object lookup
-        if (languageStore.t) {
-          return languageStore.t(translations) || key
-        }
-        return translations[currentLanguage.value] || translations.en || key
-      }
-      if (languageStore.t) {
-        return languageStore.t({ en: key, ar: key }) || key
-      }
-      return key
+  if (typeof key === 'string') {
+    const translations = appTranslations[key as keyof typeof appTranslations]
+    if (translations) {
+      return translations[safeLanguage.value] || translations.en || key
     }
-    
-    // key is an object with en/ar
-    if (languageStore.t) {
-      return languageStore.t(key) || key.en || ''
-    }
-    return key[currentLanguage.value] || key.en || ''
-  } catch (error) {
-    if (typeof key === 'string') {
-      const translations = appTranslations[key as keyof typeof appTranslations]
-      if (translations) return translations.en || key
-      return key
-    }
-    return key.en || ''
+    return key
   }
+  
+  // key is an object with en/ar
+  return key[safeLanguage.value] || key.en || ''
 }
 
 // Admin methods

@@ -169,7 +169,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useHomepageStore } from '@/stores/homepage'
@@ -290,7 +289,8 @@ const safeTranslate = (key: string) => {
     if (languageStore.t) {
       return languageStore.t(translations) || translations.en || key
     }
-    return translations[languageStore.currentLanguage] || translations.en || key
+    // Use .value because currentLanguage is a ref
+    return translations[languageStore.currentLanguage.value] || translations.en || key
   } catch (error) {
     console.warn('Translation error:', error)
     return key
@@ -305,11 +305,11 @@ const loadHomepageData = async () => {
   Object.assign(heroBannerForm, homepageStore.homepageData.heroBanner)
 }
 
-// Update hero banner
+// Update hero banner using updateHomepageData (which exists)
 const updateHeroBanner = async () => {
   saving.value = true
   try {
-    await homepageStore.updateHeroBanner(heroBannerForm)
+    await homepageStore.updateHomepageData({ heroBanner: heroBannerForm })
     editingHeroBanner.value = false
     showNotification('success', safeTranslate('Hero banner updated successfully'))
   } catch (error) {
@@ -334,7 +334,7 @@ const deleteBrand = async (index: number) => {
   brands.splice(index, 1)
   
   try {
-    await homepageStore.updateFeaturedBrands(brands)
+    await homepageStore.updateHomepageData({ featuredBrands: brands })
     showNotification('success', safeTranslate('Brand deleted successfully'))
   } catch (error) {
     showNotification('error', safeTranslate('Failed to delete brand'))
@@ -349,7 +349,7 @@ const moveBrandUp = async (index: number) => {
     brands[index - 1] = temp
     
     try {
-      await homepageStore.updateFeaturedBrands(brands)
+      await homepageStore.updateHomepageData({ featuredBrands: brands })
     } catch (error) {
       showNotification('error', safeTranslate('Failed to move brand'))
     }
@@ -364,7 +364,7 @@ const moveBrandDown = async (index: number) => {
     brands[index + 1] = temp
     
     try {
-      await homepageStore.updateFeaturedBrands(brands)
+      await homepageStore.updateHomepageData({ featuredBrands: brands })
     } catch (error) {
       showNotification('error', safeTranslate('Failed to move brand'))
     }
@@ -390,7 +390,7 @@ const saveBrand = async () => {
       })
     }
     
-    await homepageStore.updateFeaturedBrands(brands)
+    await homepageStore.updateHomepageData({ featuredBrands: brands })
     showAddBrandModal.value = false
     resetBrandForm()
     showNotification('success', safeTranslate('Brand saved successfully'))
@@ -429,7 +429,7 @@ const removeOffer = async (index: number) => {
   if (!confirm(safeTranslate('Are you sure you want to remove this offer?'))) return
   
   try {
-    await homepageStore.updateActiveOffers([])
+    await homepageStore.updateHomepageData({ activeOffers: [] })
     showNotification('success', safeTranslate('Offer removed successfully'))
   } catch (error) {
     showNotification('error', safeTranslate('Failed to remove offer'))
@@ -455,7 +455,7 @@ const saveOffer = async () => {
       })
     }
     
-    await homepageStore.updateActiveOffers(offers)
+    await homepageStore.updateHomepageData({ activeOffers: offers })
     showAddOfferModal.value = false
     resetOfferForm()
     showNotification('success', safeTranslate('Offer saved successfully'))
@@ -492,7 +492,7 @@ const addMarqueeBrand = async () => {
       id: Date.now().toString()
     })
     
-    await homepageStore.updateMarqueeBrands(brands)
+    await homepageStore.updateHomepageData({ marqueeBrands: brands })
     showAddMarqueeBrandModal.value = false
     resetMarqueeBrandForm()
     showNotification('success', safeTranslate('Marquee brand added successfully'))
@@ -510,7 +510,7 @@ const deleteMarqueeBrand = async (index: number) => {
   brands.splice(index, 1)
   
   try {
-    await homepageStore.updateMarqueeBrands(brands)
+    await homepageStore.updateHomepageData({ marqueeBrands: brands })
     showNotification('success', safeTranslate('Marquee brand deleted successfully'))
   } catch (error) {
     showNotification('error', safeTranslate('Failed to delete marquee brand'))

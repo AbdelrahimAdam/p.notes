@@ -1,11 +1,10 @@
- import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
   collection,
   doc,
   getDoc,
   getDocs,
-  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -113,23 +112,33 @@ export const useBrandsStore = defineStore('brands', () => {
         const data = d.data()
         return {
           id: d.id,
+          slug: data.slug || '',
           name: data.name || { en: '', ar: '' },
           description: data.description || { en: '', ar: '' },
+          brand: data.brand || '',
+          brandSlug: data.brandSlug || '',
+          brandId: data.brandId || '',
           price: Number(data.price || 0),
+          originalPrice: Number(data.originalPrice) || undefined,
           size: data.size || '100ml',
           concentration: data.concentration || 'Eau de Parfum',
+          classification: data.classification || '',
+          notes: data.notes || { top: [], heart: [], base: [] },
           imageUrl: data.imageUrl || '',
           images: Array.isArray(data.images) ? data.images : [],
-          inStock: data.inStock !== false,
+          category: data.category || '',
           isBestSeller: data.isBestSeller || false,
           isFeatured: data.isFeatured || false,
-          slug: data.slug || '',
-          brand: data.brand || '',
-          category: data.category || '',
-          ratings: data.ratings || 0,
-          ratingCount: data.ratingCount || 0,
+          isNew: data.isNew || false,
+          isActive: data.isActive !== false,
+          inStock: data.inStock !== false,
+          stockQuantity: Number(data.stockQuantity || data.stock || 0), // handle both fields
+          rating: Number(data.rating) || undefined,
+          reviewCount: Number(data.reviewCount) || undefined,
+          sku: data.sku || '',
           createdAt: data.createdAt?.toDate?.() || new Date(),
-          updatedAt: data.updatedAt?.toDate?.() || new Date()
+          updatedAt: data.updatedAt?.toDate?.() || new Date(),
+          meta: data.meta || {}
         } as Product
       })
 
@@ -263,7 +272,7 @@ export const useBrandsStore = defineStore('brands', () => {
           brandId: brandId,
           category: product.category || brandData.category || '',
           // Handle stock quantity correctly
-          stockQuantity: Number(product.stock || product.stockQuantity || 0),
+          stockQuantity: Number(product.stockQuantity || 0),
           sku: product.sku || '',
           notes: product.notes || { top: [], heart: [], base: [] },
           createdAt: serverTimestamp(),

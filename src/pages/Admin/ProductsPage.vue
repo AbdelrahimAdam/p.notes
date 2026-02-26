@@ -593,7 +593,7 @@
                 <div>
                   <label class="text-sm font-medium text-gray-500">{{ t('Description') }}</label>
                   <p class="text-gray-900 whitespace-pre-line">
-                    {{ selectedProduct.description?.[currentLanguage] || selectedProduct.description?.en || t('No description') }}
+                    {{ getProductDescription(selectedProduct) }}
                   </p>
                 </div>
                 <div>
@@ -652,6 +652,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
@@ -666,7 +667,9 @@ const languageStore = useLanguageStore()
 const productsStore = useProductsStore()
 const brandsStore = useBrandsStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+// Use storeToRefs for reactive refs
+const { currentLanguage, isRTL } = storeToRefs(languageStore)
+const { t } = languageStore // t is a function, not a ref
 
 // State
 const searchQuery = ref('')
@@ -803,22 +806,26 @@ const endIndex = computed(() => {
 })
 
 // Helper methods
-const getCategoryDisplayName = (category: Category) => {
+const getCategoryDisplayName = (category: Category): string => {
   if (!category) return ''
-  if (typeof category === 'string') return category
-  return category[currentLanguage.value] || category.name || category.id || ''
+  // Category has en/ar properties, not a string name
+  return category[currentLanguage.value] || category.en || category.id
 }
 
-const getCategoryName = (categoryId: string) => {
+const getCategoryName = (categoryId: string): string => {
   if (!categoryId) return ''
   const category = productsStore.categories.find(cat => cat.id === categoryId)
   return category ? getCategoryDisplayName(category) : categoryId
 }
 
-const getProductName = (product: Product | null) => {
+const getProductName = (product: Product | null): string => {
   if (!product) return ''
   if (typeof product.name === 'string') return product.name
   return product.name?.[currentLanguage.value] || product.name?.en || t('Unnamed Product')
+}
+
+const getProductDescription = (product: Product): string => {
+  return product.description?.[currentLanguage.value] || product.description?.en || t('No description')
 }
 
 const getProductDate = (date: any): Date => {
@@ -1234,6 +1241,7 @@ onMounted(async () => {
   }
 })
 </script>
+
 <style scoped>
 .luxury-loading-spinner {
   width: 50px;

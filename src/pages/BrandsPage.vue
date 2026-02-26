@@ -163,32 +163,22 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useLanguageStore } from '@/stores/language'
-import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
 import SEOHead from '@/components/UI/SEOHead.vue'
 
 const languageStore = useLanguageStore()
-const productsStore = useProductsStore()
 const brandsStore = useBrandsStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+const { currentLanguage, isRTL } = storeToRefs(languageStore)
+const { t } = languageStore
 
 // State
 const selectedCategory = ref<string | null>(null)
 const defaultBrandImage = '/images/brand-default.jpg'
 
 // Page SEO
-const pageTitle = computed(() => 
-  currentLanguage.value === 'en' ? 'Premium Perfume Brands' : 'ماركات العطور المميزة'
-)
-
-const pageDescription = computed(() => 
-  currentLanguage.value === 'en'
-    ? 'Discover luxury fragrances from the world\'s most prestigious perfume houses. Each brand represents a unique olfactory journey.'
-    : 'اكتشف العطور الفاخرة من أشهر دور العطور العالمية. كل ماركة تمثل رحلة شمية فريدة.'
-)
-
 const seoTitle = computed(() => 
   currentLanguage.value === 'en' ? 'Brands | Luxury Perfume Collections' : 'الماركات | مجموعات العطور الفاخرة'
 )
@@ -239,12 +229,6 @@ onMounted(async () => {
   
   // Initialize brands store
   await brandsStore.initialize()
-  
-  // Load products if needed
-  if (productsStore.products.length === 0) {
-    console.log('📦 Loading products...')
-    await productsStore.fetchProducts()
-  }
   
   console.log('🎉 BrandsPage ready with', activeBrands.value.length, 'active brands')
 })

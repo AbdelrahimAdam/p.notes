@@ -200,12 +200,12 @@ export interface AdminUser {
   email: string
   displayName: string
   photoURL?: string
-  phoneNumber?: string // added
+  phoneNumber?: string
   role: 'admin' | 'super-admin'
   lastLogin?: Date
   isActive?: boolean
-  createdAt?: string
-  lastLoginAt?: string
+  createdAt?: Date
+  updatedAt?: Date
   permissions?: string[]
 }
 
@@ -218,7 +218,10 @@ export interface CustomerUser {
   phoneNumber?: string
   addresses?: Address[]
   defaultAddressId?: string
+  wishlist?: string[]
+  newsletter?: boolean
   createdAt?: Date
+  updatedAt?: Date
   lastLogin?: Date
 }
 
@@ -280,6 +283,7 @@ export interface StatusHistoryItem {
   status: OrderStatus
   date: Date
   note?: string
+  updatedBy?: string                      // ✅ added
 }
 
 export interface OrderCustomer {
@@ -297,12 +301,38 @@ export interface OrderCustomer {
   country?: string
 }
 
+// ✅ Define OrderItem (used in orders)
+export interface OrderItem {
+  id: string
+  productId: string
+  name: string
+  nameAr?: string
+  price: number
+  quantity: number
+  size: string
+  concentration?: string
+  image: string
+  brand?: string
+  imageUrl?: string
+  originalPrice?: number
+}
+
+// ✅ Define ShippingAddress
+export interface ShippingAddress {
+  name: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  country: string
+}
+
 export interface Order {
   id: string
   orderNumber: string
 
   customer: OrderCustomer
-  items: CartItem[]
+  items: OrderItem[]                       // ✅ now OrderItem is defined
 
   subtotal: number
   shippingCost: number
@@ -320,6 +350,7 @@ export interface Order {
   notes?: string
   adminNotes?: string
 
+  userId?: string                           // ✅ added
   guestId?: string
   userEmail?: string // legacy
 
@@ -335,13 +366,20 @@ export interface Order {
 // Firestore order type (with Timestamps)
 import type { Timestamp } from 'firebase/firestore'
 
-export interface FirestoreOrder extends Omit<Order, 'createdAt' | 'updatedAt' | 'shippedAt' | 'deliveredAt' | 'cancelledAt' | 'statusHistory'> {
-  createdAt: Timestamp
-  updatedAt: Timestamp
-  shippedAt?: Timestamp
-  deliveredAt?: Timestamp
-  cancelledAt?: Timestamp
-  statusHistory?: Array<Omit<StatusHistoryItem, 'date'> & { date: Timestamp }>
+export interface FirestoreOrder extends Omit<Order, 'createdAt' | 'updatedAt' | 'shippedAt' | 'deliveredAt' | 'cancelledAt' | 'statusHistory' | 'id'> {
+  userId?: string | null
+  guestId?: string | null                  // ✅ allow null for Firestore
+  createdAt: Timestamp | FieldValue
+  updatedAt: Timestamp | FieldValue
+  shippedAt?: Timestamp | FieldValue | null
+  deliveredAt?: Timestamp | FieldValue | null
+  cancelledAt?: Timestamp | FieldValue | null
+  statusHistory?: Array<{
+    status: OrderStatus
+    timestamp: Timestamp
+    note?: string
+    updatedBy?: string
+  }>
 }
 
 // ===============================
@@ -527,4 +565,4 @@ export interface UpdateAdminDto {
 // ===============================
 // Exports for convenience
 // ===============================
-export type { Timestamp } // re-export if needed
+export type { Timestamp }

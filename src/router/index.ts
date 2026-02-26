@@ -44,7 +44,7 @@ const publicPathPatterns = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior(to, from, savedPosition) {
+  scrollBehavior(_to, _from, savedPosition) {
     return savedPosition || { top: 0 }
   }
 })
@@ -161,7 +161,7 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-router.afterEach((to, from) => {
+router.afterEach((to, _from) => {
   console.log('✅ Navigation completed:', to.fullPath)
 })
 

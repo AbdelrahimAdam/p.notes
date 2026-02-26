@@ -973,7 +973,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue' // ✅ Added watch import
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
@@ -988,7 +988,8 @@ const productsStore = useProductsStore()
 const brandsStore = useBrandsStore()
 const authStore = useAuthStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+// Destructure only needed values; isRTL is unused
+const { currentLanguage, t } = languageStore
 
 const props = defineProps<{
   product?: Product
@@ -1098,7 +1099,7 @@ const productData = reactive({
   sku: ''
 })
 
-// NEW: Store original product for change tracking
+// Store original product for change tracking
 const originalProduct = ref<Product | null>(null)
 
 // Product image state
@@ -1157,7 +1158,8 @@ const formatBytes = (bytes: number): string => {
 const getCategoryDisplayName = (category: Category) => {
   if (!category) return ''
   if (typeof category === 'string') return category
-  return category[currentLanguage.value] || category.name || category.id || ''
+  // ✅ Use id as fallback instead of name (which doesn't exist on Category)
+  return category[currentLanguage.value] || category.id || ''
 }
 
 const isValidUrl = (url: string): boolean => {

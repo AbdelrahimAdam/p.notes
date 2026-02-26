@@ -345,7 +345,7 @@
                           :src="product.imageBase64 || product.imageUrl"
                           :alt="product.name?.en || ''"
                           class="w-full h-full object-cover"
-                          @error="handleProductImageError(index)"
+                          @error="() => handleProductImageError(index)"
                         />
                         <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -393,14 +393,14 @@
                       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
                         <div class="flex-1">
                           <input
-                            v-model="product.name.en"
+                            v-model="product.name!.en"
                             type="text"
                             :placeholder="t('Product Name (English)')"
                             class="w-full px-2 py-1 text-sm font-medium text-gray-900 border-0 bg-transparent focus:outline-none focus:ring-0 border-b border-transparent focus:border-gray-300"
                             :class="{ '!border-red-300': productErrors[index]?.nameEn }"
                           />
                           <input
-                            v-model="product.name.ar"
+                            v-model="product.name!.ar"
                             type="text"
                             :placeholder="t('Product Name (Arabic)')"
                             class="w-full px-2 py-1 text-sm text-gray-600 border-0 bg-transparent focus:outline-none focus:ring-0 rtl:text-right border-b border-transparent focus:border-gray-300 mt-1"
@@ -512,13 +512,13 @@
                       <div class="mt-3">
                         <label class="block text-xs text-gray-500 mb-1">{{ t('Description') }}</label>
                         <textarea
-                          v-model="product.description.en"
+                          v-model="product.description!.en"
                           rows="2"
                           :placeholder="t('Brief description (English)')"
                           class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none"
                         ></textarea>
                         <textarea
-                          v-model="product.description.ar"
+                          v-model="product.description!.ar"
                           rows="2"
                           :placeholder="t('وصف مختصر (العربية)')"
                           class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none rtl:text-right mt-2"
@@ -637,12 +637,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed, onMounted } from 'vue'
+import type { ComponentPublicInstance } from 'vue' // ✅ Import for ref typing
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
 import { useHomepageStore } from '@/stores/homepage'
 import { useAuthStore } from '@/stores/auth'
-import type { Brand, Product } from '@/types'
+import type { Brand, Product, Translation } from '@/types'
 
 const languageStore = useLanguageStore()
 const productsStore = useProductsStore()
@@ -723,7 +724,13 @@ const brandImageBase64 = ref<string>('')
 const brandImageFile = ref<File | null>(null)
 
 // Products array with base64 images and classification (gender)
-const products = ref<Partial<Product & { imageBase64?: string; classification?: string }>[]>([])
+// Use a type that includes optional imageBase64 and required classification for templates
+type ProductWithTemp = Partial<Product> & {
+  imageBase64?: string;
+  classification?: string; // 'M' | 'F' | 'U'
+}
+
+const products = ref<ProductWithTemp[]>([])
 
 // Form state
 const errors = reactive({
@@ -740,7 +747,7 @@ const productFileInputs = ref<(HTMLInputElement | null)[]>([])
 const editing = computed(() => !!props.brand?.id)
 
 // Product templates (updated to include classification)
-const productTemplates = {
+const productTemplates: Record<string, ProductWithTemp> = {
   noirExtreme: {
     name: { en: 'Noir Extreme', ar: 'نوار إكستريم' },
     description: { 
@@ -829,11 +836,12 @@ onMounted(() => {
 // Load existing products for this brand
 const loadExistingProducts = async (brandSlug: string) => {
   try {
-    const brandProducts = productsStore.getProductsByBrand(brandSlug)
-    if (brandProducts.length > 0) {
+    // Await the async function
+    const brandProducts = await productsStore.getProductsByBrand(brandSlug)
+    if (brandProducts && brandProducts.length > 0) {
       products.value = brandProducts.map(product => ({
         id: product.id,
-        name: product.name,
+        name: product.name || { en: '', ar: '' },
         description: product.description || { en: '', ar: '' },
         price: product.price,
         size: product.size || '100ml',
@@ -1024,7 +1032,9 @@ const validateForm = () => {
   products.value.forEach((product, index) => {
     const productError: any = {}
     
-    if (!product.name?.en?.trim()) {
+    // Ensure name object exists and has en/ar
+    const name = product.name || { en: '', ar: '' }
+    if (!name.en?.trim()) {
       console.log(`❌ Product ${index} English name is required`)
       productError.nameEn = t('Product name (English) is required')
       isValid = false
@@ -1062,7 +1072,7 @@ const validateForm = () => {
 
 const addNewProduct = () => {
   console.log('➕ Adding new product')
-  const newProduct: Partial<Product & { imageBase64?: string; classification?: string }> = {
+  const newProduct: ProductWithTemp = {
     id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     name: { en: '', ar: '' },
     description: { en: '', ar: '' },
@@ -1089,10 +1099,21 @@ const addNewProduct = () => {
 const addProductTemplate = (templateName: keyof typeof productTemplates) => {
   console.log('📋 Adding product template:', templateName)
   const template = productTemplates[templateName]
-  const newProduct: Partial<Product & { imageBase64?: string; classification?: string }> = {
+  
+  // ✅ Ensure name and description have required en/ar strings (not undefined)
+  const name: Translation = {
+    en: template.name?.en ?? '',
+    ar: template.name?.ar ?? ''
+  }
+  const description: Translation = {
+    en: template.description?.en ?? '',
+    ar: template.description?.ar ?? ''
+  }
+  
+  const newProduct: ProductWithTemp = {
     id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    name: { ...template.name },
-    description: { ...template.description },
+    name,
+    description,
     price: template.price,
     size: template.size,
     concentration: template.concentration,
@@ -1137,8 +1158,13 @@ const removeProductImage = (index: number) => {
   products.value[index].images = []
 }
 
-const setProductFileInputRef = (el: HTMLInputElement | null, index: number) => {
-  productFileInputs.value[index] = el
+const setProductFileInputRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  // Cast to HTMLInputElement | null safely
+  if (el instanceof HTMLInputElement) {
+    productFileInputs.value[index] = el
+  } else {
+    productFileInputs.value[index] = null
+  }
 }
 
 const uploadProductImage = (index: number) => {
@@ -1196,7 +1222,7 @@ const generateSkuBatch = (brandName: string): void => {
   const { code: brandAbbr, isFallback } = getBrandAbbreviation(brandName)
   
   // Group products by gender
-  const genderGroups: Record<string, typeof products.value> = { M: [], F: [], U: [] }
+  const genderGroups: Record<string, ProductWithTemp[]> = { M: [], F: [], U: [] }
   products.value.forEach(product => {
     if (product.classification) {
       genderGroups[product.classification].push(product)
@@ -1314,9 +1340,13 @@ const saveBrandAndProducts = async () => {
         .replace(/--+/g, '-')
         .trim()
       
+      // Ensure name and description have default objects
+      const name = product.name || { en: '', ar: '' }
+      const description = product.description || { en: '', ar: '' }
+      
       const preparedProduct: Partial<Product> = {
-        name: product.name || { en: '', ar: '' },
-        description: product.description || { en: '', ar: '' },
+        name: name,
+        description: description,
         price: Number(product.price) || 0,
         size: product.size || '100ml',
         concentration: product.concentration || 'Eau de Parfum',

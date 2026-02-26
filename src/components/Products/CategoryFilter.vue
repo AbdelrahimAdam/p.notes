@@ -19,7 +19,7 @@
           :style="{ direction: isRTL ? 'rtl' : 'ltr' }"
         >
           <div class="flex items-center justify-between">
-            <span>{{ category[currentLanguage] }}</span>
+            <span>{{ getCategoryName(category) }}</span>
             <span v-if="categoryCounts[category.id]" class="text-sm opacity-75">
               {{ categoryCounts[category.id] }}
             </span>
@@ -89,7 +89,7 @@
       <div class="space-y-2">
         <button
           v-for="range in priceRanges"
-          :key="range.label"
+          :key="`${range.min}-${range.max}`"
           @click="updatePriceRange(range)"
           :class="[
             'w-full text-left px-4 py-3 rounded-lg transition-all duration-200',
@@ -98,7 +98,7 @@
               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
           ]"
         >
-          {{ range.label[currentLanguage] }}
+          {{ getRangeLabel(range) }}
         </button>
       </div>
     </div>
@@ -120,7 +120,7 @@
               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
           ]"
         >
-          {{ concentration.label[currentLanguage] }}
+          {{ getConcentrationLabel(concentration) }}
         </button>
       </div>
     </div>
@@ -142,7 +142,7 @@
               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
           ]"
         >
-          {{ option.label[currentLanguage] }}
+          {{ getSortOptionLabel(option) }}
         </button>
       </div>
     </div>
@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue' // removed unused 'ref'
 import type { FilterOptions } from '@/types'
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
@@ -183,6 +183,12 @@ const productsStore = useProductsStore()
 const { currentLanguage, isRTL } = languageStore
 const { categories, products } = productsStore
 
+// Safe language for indexing (only 'en' or 'ar')
+const safeLang = computed(() => {
+  const lang = currentLanguage.value
+  return lang === 'en' || lang === 'ar' ? lang : 'en'
+})
+
 // Use concentrations from luxuryConstants
 const concentrations = LUXURY_CONCENTRATIONS
 
@@ -201,6 +207,23 @@ const categoryCounts = computed(() => {
   return counts
 })
 
+// Helper methods for localized labels
+const getCategoryName = (category: any) => {
+  return category[safeLang.value] || category.en || category.id
+}
+
+const getRangeLabel = (range: typeof priceRanges[number]) => {
+  return range.label[safeLang.value]
+}
+
+const getConcentrationLabel = (concentration: typeof concentrations[number]) => {
+  return concentration.label[safeLang.value]
+}
+
+const getSortOptionLabel = (option: typeof sortOptions[number]) => {
+  return option.label[safeLang.value]
+}
+
 // Methods
 const updateFilter = (key: keyof FilterOptions, value: any) => {
   const newFilters = { ...props.filters }
@@ -214,7 +237,7 @@ const updateFilter = (key: keyof FilterOptions, value: any) => {
   emit('update:filters', newFilters)
 }
 
-const updatePriceRange = (range: typeof priceRanges[0]) => {
+const updatePriceRange = (range: typeof priceRanges[number]) => {
   const newFilters = { ...props.filters }
   
   if (isPriceRangeSelected(range)) {
@@ -232,7 +255,7 @@ const clearFilters = () => {
   emit('update:filters', {})
 }
 
-const isPriceRangeSelected = (range: typeof priceRanges[0]) => {
+const isPriceRangeSelected = (range: typeof priceRanges[number]) => {
   return (
     props.filters.minPrice === range.min &&
     (props.filters.maxPrice === range.max || 

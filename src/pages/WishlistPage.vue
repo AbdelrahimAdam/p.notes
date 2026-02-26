@@ -336,7 +336,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useLanguageStore } from '@/stores/language'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
@@ -344,16 +344,16 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useProductsStore } from '@/stores/products'
 import SEOHead from '@/components/UI/SEOHead.vue'
 import { showNotification } from '@/utils/notifications'
-import type { Product } from '@/types'
 
-const router = useRouter()
 const languageStore = useLanguageStore()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 const productsStore = useProductsStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+// Use storeToRefs for reactive language refs
+const { currentLanguage, isRTL } = storeToRefs(languageStore)
+const { t } = languageStore // t is a function, not a ref
 
 // Local state
 const expandedItems = ref<string[]>([])
@@ -377,8 +377,8 @@ const sortedItems = computed(() => {
       return items.sort((a, b) => b.price - a.price)
     case 'name':
       return items.sort((a, b) => {
-        const nameA = a.name?.[currentLanguage.value] || ''
-        const nameB = b.name?.[currentLanguage.value] || ''
+        const nameA = getItemName(a)
+        const nameB = getItemName(b)
         return nameA.localeCompare(nameB)
       })
     case 'brand':
@@ -515,7 +515,7 @@ const shareWishlist = async () => {
   }
   
   try {
-    shareableLink.value = await wishlistStore.generateShareableLink(authStore.user?.id || '')
+    shareableLink.value = await wishlistStore.generateShareableLink(authStore.user?.uid || '')
     showShareModal.value = true
   } catch (error) {
     console.error('Error generating shareable link:', error)
@@ -567,7 +567,7 @@ const updatePrivacy = async () => {
   }
   
   try {
-    await wishlistStore.updatePrivacySetting(privacySetting.value as any)
+    await wishlistStore.updatePrivacySetting(privacySetting.value as 'private' | 'shared' | 'public')
     showNotification({
       title: t('Privacy Updated'),
       message: t('Your wishlist privacy settings have been updated'),

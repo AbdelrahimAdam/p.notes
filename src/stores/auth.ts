@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   type User as FirebaseUser,
   sendPasswordResetEmail,
-  confirmPasswordReset as firebaseConfirmPasswordReset, // renamed to avoid shadowing
+  confirmPasswordReset as firebaseConfirmPasswordReset,
   updateProfile,
   updatePassword,
   reauthenticateWithCredential,
@@ -24,7 +24,7 @@ import {
   arrayRemove
 } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
-import { authNotification } from '@/utils/notifications'
+import { authNotification, showInfo } from '@/utils/notifications'
 
 // List of public paths that don't need authentication
 const PUBLIC_PATHS = [
@@ -98,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (!adminDoc.exists()) return null
       const data = adminDoc.data()
       return {
-        id: firebaseUser.uid,
+        uid: firebaseUser.uid,
         email: firebaseUser.email || '',
         displayName: data.displayName || firebaseUser.displayName || '',
         role: 'super-admin',
@@ -122,7 +122,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (!customerDoc.exists()) {
         // If customer doesn't exist in Firestore, create a basic profile
         const newCustomer: CustomerUser = {
-          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
           photoURL: firebaseUser.photoURL || undefined,
@@ -146,7 +146,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       const data = customerDoc.data()
       return {
-        id: firebaseUser.uid,
+        uid: firebaseUser.uid,
         email: firebaseUser.email || '',
         displayName: data.displayName || firebaseUser.displayName || '',
         photoURL: data.photoURL || firebaseUser.photoURL || undefined,
@@ -263,7 +263,7 @@ export const useAuthStore = defineStore('auth', () => {
     email: string
     password: string
     displayName: string
-    phone?: string
+    phoneNumber?: string
   }): Promise<CustomerUser> => {
     isLoading.value = true
     error.value = null
@@ -278,11 +278,11 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       const newCustomer: CustomerUser = {
-        id: firebaseUser.uid,
+        uid: firebaseUser.uid,
         email: userData.email,
         displayName: userData.displayName,
         photoURL: undefined,
-        phone: userData.phone,
+        phoneNumber: userData.phoneNumber,
         addresses: [],
         wishlist: [],
         newsletter: false,
@@ -319,7 +319,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Update customer profile (displayName, phone, preferences)
   const updateCustomerProfile = async (profileData: {
     displayName?: string
-    phone?: string
+    phoneNumber?: string
     newsletter?: boolean
     smsNotifications?: boolean
     dob?: string
@@ -345,13 +345,13 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // Update customer document in Firestore
-      const customerRef = doc(db, 'customers', customer.value.id)
+      const customerRef = doc(db, 'customers', customer.value.uid)
       const updateData: any = {
         updatedAt: serverTimestamp()
       }
 
       if (profileData.displayName) updateData.displayName = profileData.displayName
-      if (profileData.phone !== undefined) updateData.phone = profileData.phone
+      if (profileData.phoneNumber !== undefined) updateData.phoneNumber = profileData.phoneNumber
       if (profileData.newsletter !== undefined) updateData.newsletter = profileData.newsletter
       if (profileData.smsNotifications !== undefined) updateData.smsNotifications = profileData.smsNotifications
       if (profileData.dob !== undefined) updateData.dob = profileData.dob
@@ -360,7 +360,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Update local customer state
       if (profileData.displayName) customer.value.displayName = profileData.displayName
-      if (profileData.phone !== undefined) customer.value.phone = profileData.phone
+      if (profileData.phoneNumber !== undefined) customer.value.phoneNumber = profileData.phoneNumber
       if (profileData.newsletter !== undefined) customer.value.newsletter = profileData.newsletter
       
       // Add any additional fields to customer object
@@ -435,7 +435,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const customerRef = doc(db, 'customers', customer.value.id)
+      const customerRef = doc(db, 'customers', customer.value.uid)
       
       // Generate a unique ID for the address
       const addressWithId = {
@@ -475,7 +475,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const customerRef = doc(db, 'customers', customer.value.id)
+      const customerRef = doc(db, 'customers', customer.value.uid)
       
       // Get current addresses
       const currentAddresses = customer.value.addresses || []
@@ -514,7 +514,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const customerRef = doc(db, 'customers', customer.value.id)
+      const customerRef = doc(db, 'customers', customer.value.uid)
       
       // Find the address to remove
       const addressToRemove = (customer.value.addresses || []).find(addr => addr.id === addressId)
@@ -552,7 +552,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const customerRef = doc(db, 'customers', customer.value.id)
+      const customerRef = doc(db, 'customers', customer.value.uid)
       
       // Update all addresses to set isDefault flag
       const updatedAddresses = (customer.value.addresses || []).map(addr => ({
@@ -580,7 +580,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Upload profile photo
-  const uploadProfilePhoto = async (file: File): Promise<string> => {
+  const uploadProfilePhoto = async (_file: File): Promise<string> => {
     if (!customer.value) {
       throw new Error('No customer logged in')
     }
@@ -591,7 +591,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // This would typically upload to Firebase Storage
       // For now, we'll return a placeholder
-      authNotification.info('Photo upload functionality coming soon')
+      showInfo('Photo upload functionality coming soon')
       return ''
     } catch (err: any) {
       console.error('❌ Error uploading photo:', err)
@@ -751,7 +751,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const firebaseUser = userCredential.user
       const adminData: AdminUser = {
-        id: firebaseUser.uid,
+        uid: firebaseUser.uid,
         email,
         displayName,
         role: 'super-admin',

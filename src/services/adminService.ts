@@ -7,16 +7,13 @@ import {
   updateDoc, 
   deleteDoc, 
   query, 
-  where, 
   orderBy,
-  Timestamp,
   serverTimestamp 
 } from 'firebase/firestore'
 import { 
   createUserWithEmailAndPassword, 
   updateProfile,
-  sendPasswordResetEmail,
-  deleteUser as deleteAuthUser 
+  sendPasswordResetEmail
 } from 'firebase/auth'
 import { db, auth } from '@/firebase/config'
 import type { AdminUser, CreateAdminDto, UpdateAdminDto } from '@/types/admin'
@@ -83,10 +80,10 @@ export class AdminService {
         email: adminData.email,
         displayName: adminData.displayName || '',
         role: adminData.role || 'admin',
-        isActive: adminData.isActive ?? true,
+        isActive: (adminData as any).isActive ?? true,
         createdAt: serverTimestamp() as any,
         lastLoginAt: serverTimestamp() as any,
-        phoneNumber: adminData.phoneNumber || ''
+        phoneNumber: (adminData as any).phoneNumber || ''
       }
 
       await setDoc(adminRef, adminDoc)
@@ -97,7 +94,7 @@ export class AdminService {
         email: adminData.email,
         displayName: adminData.displayName || '',
         role: adminData.role || 'admin',
-        isActive: adminData.isActive ?? true,
+        isActive: (adminData as any).isActive ?? true,
         createdAt: serverTimestamp() as any,
         isAdmin: true
       }, { merge: true })
@@ -138,14 +135,14 @@ export class AdminService {
       if (updateData.role !== undefined) {
         updatePayload.role = updateData.role
       }
-      if (updateData.isActive !== undefined) {
-        updatePayload.isActive = updateData.isActive
+      if ((updateData as any).isActive !== undefined) {
+        updatePayload.isActive = (updateData as any).isActive
       }
-      if (updateData.phoneNumber !== undefined) {
-        updatePayload.phoneNumber = updateData.phoneNumber
+      if ((updateData as any).phoneNumber !== undefined) {
+        updatePayload.phoneNumber = (updateData as any).phoneNumber
       }
-      if (updateData.permissions !== undefined) {
-        updatePayload.permissions = updateData.permissions
+      if ((updateData as any).permissions !== undefined) {
+        updatePayload.permissions = (updateData as any).permissions
       }
 
       // Update in admins collection
@@ -155,7 +152,7 @@ export class AdminService {
       await updateDoc(userRef, {
         displayName: updateData.displayName,
         role: updateData.role,
-        isActive: updateData.isActive,
+        isActive: (updateData as any).isActive,
         updatedAt: serverTimestamp()
       })
 
@@ -244,7 +241,7 @@ export class AdminService {
       return admins.filter(admin => 
         admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         admin.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        admin.phoneNumber?.includes(searchTerm)
+        (admin as any).phoneNumber?.includes(searchTerm)
       )
     } catch (error) {
       console.error('Error searching admins:', error)
