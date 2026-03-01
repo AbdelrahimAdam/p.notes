@@ -127,18 +127,13 @@
                 </svg>
               </button>
               
-              <!-- ADMIN LOGIN - Always visible -->
-              <router-link to="/admin/login" class="luxury-header-action admin-login" :title="languageStore.t('adminLogin') || 'Admin Login'">
-                <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
-                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </router-link>
-              
-              <!-- CUSTOMER LOGIN/ACCOUNT -->
-              <button v-if="!isAuthenticated" class="luxury-header-action" @click="router.push('/login')" :aria-label="languageStore.t('customerLogin') || 'Customer Login'">
+              <!-- Unified User Login / Account -->
+              <button 
+                v-if="!isAuthenticated" 
+                class="luxury-header-action" 
+                @click="router.push('/login')" 
+                :aria-label="languageStore.t('login')"
+              >
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
                         stroke="currentColor" stroke-width="1.5"/>
@@ -156,7 +151,7 @@
                 </svg>
               </button>
               
-              <!-- Simple Wishlist Link -->
+              <!-- Wishlist Link -->
               <router-link to="/wishlist" class="luxury-header-action">
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
@@ -165,7 +160,7 @@
                 <span v-if="wishlistStore.totalItems > 0" class="wishlist-badge">{{ wishlistStore.totalItems > 99 ? '99+' : wishlistStore.totalItems }}</span>
               </router-link>
               
-              <!-- Simple Cart Link -->
+              <!-- Cart Link -->
               <router-link to="/cart" class="luxury-header-action">
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
@@ -178,37 +173,8 @@
           
           <!-- Mobile Actions Row -->
           <div class="mobile-actions-row">
-            <!-- ADMIN LOGIN (Mobile) -->
-            <router-link to="/admin/login" class="mobile-action-icon-link admin-login-mobile" :title="languageStore.t('adminLogin') || 'Admin'">
-              <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </router-link>
-            
-            <!-- Customer Login/Account (Mobile) -->
-            <template v-if="!isAuthenticated">
-              <router-link to="/login" class="mobile-action-icon-link" :title="languageStore.t('customerLogin')">
-                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
-                  <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
-                        stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
-                        stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-              </router-link>
-            </template>
-            <router-link v-else to="/account" class="mobile-action-icon-link" :title="languageStore.t('account')">
-              <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
-                      stroke="currentColor" stroke-width="1.5"/>
-                <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
-                      stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-            </router-link>
-            
-            <!-- Simple Wishlist Link (Mobile) -->
+            <!-- Only hamburger, cart, and wishlist on mobile -->
+            <!-- Wishlist Link (Mobile) -->
             <router-link to="/wishlist" class="mobile-action-icon-link">
               <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
                 <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
@@ -217,7 +183,7 @@
               <span v-if="wishlistStore.totalItems > 0" class="mobile-wishlist-badge">{{ wishlistStore.totalItems > 99 ? '99+' : wishlistStore.totalItems }}</span>
             </router-link>
             
-            <!-- Simple Cart Link (Mobile) -->
+            <!-- Cart Link (Mobile) -->
             <router-link to="/cart" class="mobile-action-icon-link">
               <svg class="mobile-icon" viewBox="0 0 24 24" fill="none">
                 <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
@@ -226,12 +192,7 @@
               <span v-if="cartStore.totalItems > 0" class="mobile-cart-badge">{{ cartStore.totalItems > 99 ? '99+' : cartStore.totalItems }}</span>
             </router-link>
             
-            <!-- Language Toggle (Mobile) -->
-            <div class="mobile-language-toggle">
-              <LuxuryLanguageToggle />
-            </div>
-            
-            <!-- Menu Toggle -->
+            <!-- Menu Toggle (Hamburger) -->
             <button class="luxury-mobile-toggle" @click="toggleMobileMenu" :class="{ 'open': mobileMenuOpen }" :aria-label="languageStore.t('menu')">
               <span class="mobile-toggle-line"></span>
               <span class="mobile-toggle-line"></span>
@@ -317,17 +278,12 @@
           
           <!-- Mobile Actions -->
           <div class="mobile-actions">
-            <!-- ADMIN LOGIN in Mobile Menu -->
-            <router-link to="/admin/login" class="mobile-action-btn" @click="closeMobileMenu">
-              <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
-                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>{{ languageStore.t('adminLogin') || 'Admin Login' }}</span>
-            </router-link>
+            <!-- Language Toggle (inside sidebar) -->
+            <div class="mobile-action-btn" @click="closeMobileMenu">
+              <LuxuryLanguageToggle />
+            </div>
             
+            <!-- Search (inside sidebar) -->
             <button class="mobile-action-btn" @click="handleMobileAction('search')">
               <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
                 <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" 
@@ -336,7 +292,7 @@
               <span>{{ languageStore.t('search') }}</span>
             </button>
             
-            <!-- Login/Account in Mobile Menu -->
+            <!-- Unified Login/Account in Mobile Menu -->
             <template v-if="!isAuthenticated">
               <router-link to="/login" class="mobile-action-btn" @click="closeMobileMenu">
                 <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
@@ -345,7 +301,7 @@
                   <path d="M3 20C3 16.6863 5.68629 14 9 14H15C18.3137 14 21 16.6863 21 20V21H3V20Z" 
                         stroke="currentColor" stroke-width="1.5"/>
                 </svg>
-                <span>{{ languageStore.t('customerLogin') || 'Customer Login' }}</span>
+                <span>{{ languageStore.t('login') }}</span>
               </router-link>
               
               <router-link to="/register" class="mobile-action-btn" @click="closeMobileMenu">
@@ -379,25 +335,25 @@
               <span>{{ languageStore.t('returns') }}</span>
             </router-link>
             
-            <!-- Simple Wishlist Link in Mobile Menu -->
-            <router-link to="/wishlist" class="mobile-action-btn" @click="closeMobileMenu">
+            <!-- Admin Panel (if admin) -->
+            <router-link v-if="isAdmin" to="/admin" class="mobile-action-btn" @click="closeMobileMenu">
               <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
                       stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span>{{ languageStore.t('wishlist') }}</span>
-              <span v-if="wishlistStore.totalItems > 0" class="mobile-wishlist-badge-menu">{{ wishlistStore.totalItems }}</span>
+              <span>{{ languageStore.t('adminPanel') }}</span>
             </router-link>
             
-            <!-- Simple Cart Link in Mobile Menu -->
-            <router-link to="/cart" class="mobile-action-btn" @click="closeMobileMenu">
+            <!-- Logout (if authenticated) -->
+            <button v-if="isAuthenticated" @click="handleLogout" class="mobile-action-btn logout-btn">
               <svg class="mobile-action-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+                <path d="M17 16L21 12M21 12L17 8M21 12H7M13 16C13 17.6569 11.6569 19 10 19H6C4.34315 19 3 17.6569 3 16V8C3 6.34315 4.34315 5 6 5H10C11.6569 5 13 6.34315 13 8" 
                       stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span>{{ languageStore.t('cart') }}</span>
-              <span v-if="cartStore.totalItems > 0" class="mobile-cart-badge-menu">{{ cartStore.totalItems }}</span>
-            </router-link>
+              <span>{{ languageStore.t('logout') }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -515,7 +471,6 @@ const searchOpen = ref(false)
 
 // Computed
 const userInitials = computed(() => {
-  // Safely access user (not a ref, just the object or null)
   if (!user || !user.displayName) return 'U'
   return user.displayName
     .split(' ')
@@ -578,16 +533,13 @@ const handleScroll = () => {
   scrolled.value = window.scrollY > 20
 }
 
-// Fixed click outside handler
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
   
-  // Close mobile menu if clicking on overlay
   if (mobileMenuOpen.value && target.closest('.luxury-mobile-overlay')) {
     closeMobileMenu()
   }
   
-  // Close user dropdown if clicking outside
   if (userMenuOpen.value && 
       !target.closest('.user-dropdown') && 
       !target.closest('.luxury-header-action[aria-label="account"]')) {
@@ -642,7 +594,6 @@ onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
   
   updateDirection()
-  
   handleScroll()
 })
 
@@ -1124,7 +1075,7 @@ onUnmounted(() => {
   stroke-linejoin: round;
 }
 
-/* Mobile Actions Row - Tighter spacing */
+/* Mobile Actions Row - Only hamburger, cart, wishlist */
 .mobile-actions-row {
   display: none;
   align-items: center;
@@ -1139,7 +1090,7 @@ onUnmounted(() => {
   }
 }
 
-/* Mobile Action Icon Links - Smaller and consistent */
+/* Mobile Action Icon Links */
 .mobile-action-icon-link {
   position: relative;
   width: 30px;
@@ -1155,14 +1106,12 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* Mobile icons - smaller */
 .mobile-icon {
   width: 15px;
   height: 15px;
   stroke: currentColor;
 }
 
-/* Mobile badges - adjusted for smaller icons */
 .mobile-wishlist-badge,
 .mobile-cart-badge {
   position: absolute;
@@ -1187,7 +1136,7 @@ onUnmounted(() => {
   color: #0a0a0a;
 }
 
-/* Mobile Toggle - Fixed size and alignment */
+/* Mobile Toggle */
 .luxury-mobile-toggle {
   display: none;
   flex-direction: column;
@@ -1219,7 +1168,6 @@ onUnmounted(() => {
   border-color: #d4af37;
 }
 
-/* Toggle lines - smaller */
 .mobile-toggle-line {
   width: 15px;
   height: 1.5px;
@@ -1238,39 +1186,6 @@ onUnmounted(() => {
 
 .luxury-mobile-toggle.open .mobile-toggle-line:nth-child(3) {
   transform: rotate(-45deg) translate(3.5px, -3.5px);
-}
-
-/* Mobile Language Toggle - Smaller */
-.mobile-language-toggle {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.mobile-language-toggle :deep(.current-language) {
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 6px;
-  color: #f4e7c1;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.mobile-language-toggle :deep(.language-code) {
-  display: none;
-}
-
-/* For very small screens, hide language toggle to make room for hamburger */
-@media (max-width: 360px) {
-  .mobile-language-toggle {
-    display: none;
-  }
 }
 
 /* Mobile Overlay */
@@ -1557,38 +1472,19 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* Mobile Badges for menu items */
-.mobile-wishlist-badge-menu,
-.mobile-cart-badge-menu {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  font-size: 0.65rem;
-  font-weight: 700;
+/* Ensure language toggle inside sidebar looks like other buttons */
+.mobile-action-btn :deep(.luxury-language-toggle) {
+  width: 100%;
 }
 
-.mobile-wishlist-badge-menu {
-  background: #ec4899;
-  color: white;
-}
-
-.mobile-cart-badge-menu {
-  background: #d4af37;
-  color: #0a0a0a;
-}
-
-.luxury-header.rtl .mobile-wishlist-badge-menu,
-.luxury-header.rtl .mobile-cart-badge-menu {
-  right: auto;
-  left: 1rem;
+.mobile-action-btn :deep(.current-language) {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0;
+  justify-content: flex-start;
 }
 
 /* Search Overlay */
@@ -1677,14 +1573,5 @@ onUnmounted(() => {
 /* No Scroll */
 .no-scroll {
   overflow: hidden;
-}
-
-/* Language Toggle Styles */
-:deep(.luxury-language-toggle) {
-  position: relative;
-}
-
-:deep(.luxury-language-toggle .languages-dropdown) {
-  z-index: 1005 !important;
 }
 </style>
