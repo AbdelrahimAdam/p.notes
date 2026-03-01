@@ -161,7 +161,7 @@
           <!-- Submit Button -->
           <button
             type="submit"
-            :disabled="loading || !form.terms || passwordMismatch"
+            :disabled="!!(loading || !form.terms || passwordMismatch)"
             class="w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-xl font-bold shadow-gold-lg hover:shadow-gold-xl transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             <span v-if="!loading">{{ t('createAccount') }}</span>
@@ -244,12 +244,12 @@ const handleRegister = async () => {
       email: form.email,
       password: form.password,
       displayName: `${form.firstName} ${form.lastName}`,
-      phone: form.phone
+      phoneNumber: form.phone // Changed from 'phone' to 'phoneNumber'
     })
 
     if (customer) {
       // Use loggedIn method for success notification
-      authNotification.loggedIn(customer.displayName)
+      authNotification.loggedIn(customer.displayName || t('customer'))
       
       // Redirect to account page
       router.push('/account')

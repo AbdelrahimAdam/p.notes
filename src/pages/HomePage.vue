@@ -241,7 +241,7 @@ const router = useRouter()
 const languageStore = useLanguageStore()
 const homepageStore = useHomepageStore()
 const brandsStore = useBrandsStore()
-const { t, formatDate } = languageStore
+const { t } = languageStore // removed formatDate
 
 // =================== COMPUTED ===================
 const homepageData = computed(() => homepageStore.homepageData || {})
@@ -314,7 +314,7 @@ onMounted(async () => {
   document.documentElement.style.scrollBehavior = 'smooth'
   
   // Subscribe to homepage updates
-  const _unsubscribe = homepageStore.subscribeToUpdates((data) => {
+  homepageStore.subscribeToUpdates((data) => {
     console.log('📡 Homepage store update notification:', {
       source: data.source,
       offers: data.activeOffers?.length,

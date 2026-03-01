@@ -4,7 +4,7 @@
     <div class="product-image-container" @click="$emit('view-details')">
       <img 
         :src="product.imageUrl || '/placeholder-perfume.jpg'"
-        :alt="product.name"
+        :alt="productName"
         class="product-image"
         loading="lazy"
       />
@@ -59,7 +59,7 @@
       <div class="text-overlay">
         <div class="text-content">
           <div class="product-brand">{{ product.brand }}</div>
-          <h3 class="product-name">{{ currentLanguage === 'en' ? product.name.en : product.name.ar }}</h3>
+          <h3 class="product-name">{{ productName }}</h3>
           <div class="product-price">
             <span class="current-price">{{ formatPrice(product.price) }} {{ currentLanguage === 'en' ? 'EGP' : 'ج.م' }}</span>
             <span v-if="product.originalPrice && product.originalPrice > product.price" 
@@ -89,7 +89,15 @@ defineEmits<{
 const languageStore = useLanguageStore()
 const { currentLanguage } = languageStore
 
-// ✅ Robust computed for new arrival
+// Computed product name based on current language
+const productName = computed(() => {
+  const name = props.product.name
+  if (typeof name === 'string') return name
+  const lang = currentLanguage as 'en' | 'ar'
+  return name[lang] || name.en || ''
+})
+
+// Check if product is new arrival (within last 30 days)
 const isNewArrival = computed(() => {
   const c = props.product?.createdAt
   if (!c) return false
@@ -709,4 +717,4 @@ const formatPrice = (price: number) => {
     display: none;
   }
 }
-</style> 
+</style>

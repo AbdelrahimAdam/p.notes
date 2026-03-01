@@ -187,14 +187,10 @@ if (authStore.user?.role !== 'super-admin') {
 // Editing states
 const editingHeroBanner = ref(false)
 const showAddBrandModal = ref(false)
-const showAddOfferModal = ref(false)
-const showAddMarqueeBrandModal = ref(false)
 const editingBrandIndex = ref<number | null>(null)
-const editingOfferIndex = ref<number | null>(null)
 
 // Loading states
 const saving = ref(false)
-// Removed unused savingBrand and savingOffer
 
 // Form data
 const heroBannerForm = reactive({
@@ -209,19 +205,6 @@ const brandForm = reactive({
   image: '',
   slug: '',
   price: 0
-})
-
-const offerForm = reactive({
-  title: '',
-  subtitle: '',
-  imageUrl: '',
-  oldPrice: 0,
-  newPrice: 0
-})
-
-const marqueeBrandForm = reactive({
-  name: '',
-  logo: ''
 })
 
 // Translations
@@ -278,7 +261,6 @@ const appTranslations = {
 const safeTranslate = (key: string) => {
   const translations = appTranslations[key as keyof typeof appTranslations]
   if (!translations) return key
-  // Fixed: currentLanguage is a string, not an object with value property
   const lang = languageStore.currentLanguage as 'en' | 'ar'
   return translations[lang] || translations.en || key
 }
@@ -321,15 +303,12 @@ const deleteBrand = async (index: number) => {
   brands.splice(index, 1)
   
   try {
-    // Fixed: use 'as any' to bypass type checking for dynamic property
     await homepageStore.updateHomepageData({ featuredBrands: brands } as any)
     showNotification('success', safeTranslate('Brand deleted successfully'))
   } catch (error) {
     showNotification('error', safeTranslate('Failed to delete brand'))
   }
 }
-
-// Removed unused moveBrandUp, moveBrandDown, saveBrand, cancelBrandEdit, saveOffer, cancelOfferEdit
 
 // Marquee brand management
 const deleteMarqueeBrand = async (index: number) => {

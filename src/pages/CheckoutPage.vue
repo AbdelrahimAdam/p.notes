@@ -336,7 +336,7 @@
                                 from-gray-50 to-gray-100 border border-gray-200">
                       <img
                         :src="item.imageUrl || '/images/default-product.jpg'"
-                        :alt="item.name[currentLanguage]"
+                        :alt="getLocalizedText(item.name)"
                         class="w-full h-full object-cover"
                         @error="handleImageError"
                       />
@@ -349,7 +349,7 @@
                   
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-medium text-gray-900 truncate">
-                      {{ item.name[currentLanguage] }}
+                      {{ getLocalizedText(item.name) }}
                     </h4>
                     <p class="text-xs text-gray-500">{{ item.size }} • {{ item.concentration }}</p>
                     <p class="text-xs text-gray-500">{{ item.brand }}</p>
@@ -508,6 +508,11 @@ const ordersStore = useOrdersStore()
 
 // Use storeToRefs to get properly typed refs
 const { currentLanguage, isRTL } = storeToRefs(languageStore)
+
+// Helper to get localized text
+const getLocalizedText = (obj: { en: string; ar: string }) => {
+  return obj[currentLanguage.value as 'en' | 'ar']
+}
 
 // State
 const loading = ref(false)

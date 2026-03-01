@@ -141,6 +141,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia' // import storeToRefs
 import { useCartStore } from '@/stores/cart'
 import { useLanguageStore } from '@/stores/language'
 import { showNotification, showConfirmation } from '@/utils/notifications'
@@ -152,6 +153,7 @@ const languageStore = useLanguageStore()
 
 const { isRTL, t: $t } = languageStore
 
+// Use storeToRefs to get reactive refs
 const {
   items,
   isOpen,
@@ -160,19 +162,17 @@ const {
   subtotal,
   shipping,
   tax,
-  total,
-  closeCart,
-  updateQuantity,
-  removeFromCart,
-  clearCart
-} = cartStore
+  total
+} = storeToRefs(cartStore)
+
+const { closeCart, updateQuantity, removeFromCart, clearCart } = cartStore
 
 const isProcessing = ref(false)
 const freeShippingThreshold = 200
 
-const itemCount = computed(() => items?.length || 0)
+const itemCount = computed(() => items.value?.length || 0)
 const luxuryItems = computed(() =>
-  (items || []).map(item => ({
+  (items.value || []).map(item => ({
     ...item,
     totalPrice: (item.price || 0) * (item.quantity || 1)
   }))
@@ -235,18 +235,20 @@ const clearCartDialog = async () => {
   }
 }
 
-watch(() => items?.length || 0, (newLength) => {
-  if (newLength === 0 && isOpen?.value) {
+// Watch for items length changes
+watch(() => items.value?.length || 0, (newLength) => {
+  if (newLength === 0 && isOpen.value) {
     setTimeout(() => closeCart(), 2000)
   }
 })
 
-watch(() => isOpen?.value, (newValue) => {
+// Watch for isOpen changes to lock body scroll
+watch(isOpen, (newValue) => {
   document.body.style.overflow = newValue ? 'hidden' : ''
 })
 
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && isOpen?.value) {
+  if (event.key === 'Escape' && isOpen.value) {
     closeCart()
   }
 }

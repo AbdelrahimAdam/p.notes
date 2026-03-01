@@ -337,7 +337,6 @@ import { useHomepageStore } from '@/stores/homepage'
 import HeroBannerEditor from './HeroBannerEditor.vue'
 import FeaturedBrandsEditor from './FeaturedBrandsEditor.vue'
 import OffersEditor from './OffersEditor.vue'
-import MarqueeBrandsEditor from './AddMarqueeBrandsEditor.vue' // adjust path if needed
 import SettingsEditor from './SettingsEditor.vue'
 
 // Heroicons v2 imports (using aliases to preserve original naming)

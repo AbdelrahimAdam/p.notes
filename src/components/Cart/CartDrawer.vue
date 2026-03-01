@@ -235,6 +235,7 @@ import { useProductsStore } from '@/stores/products'
 import { useLanguageStore } from '@/stores/language'
 import LuxuryCartItem from './LuxuryCartItem.vue'
 import { showNotification } from '@/utils/notifications'
+import type { CartItem, Product } from '@/types'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -253,21 +254,22 @@ const {
   closeCart,
   updateQuantity,
   removeFromCart
-} = storeToRefs(cartStore) as any // 'as any' is safe because we only need the values, not the methods
+} = storeToRefs(cartStore) as any
 
 // Get methods directly from store (not as refs)
-const { closeCart: closeCartAction, updateQuantity: updateQuantityAction, removeFromCart: removeFromCartAction } = cartStore
+// Remove unused destructured variables
+// const { closeCart: closeCartAction, updateQuantity: updateQuantityAction, removeFromCart: removeFromCartAction } = cartStore
 
 // Language store reactive state
 const { currentLanguage, isRTL } = storeToRefs(languageStore)
-const { t: $t } = languageStore // t is a function, not a ref
+const { t: $t } = languageStore
 
 // Computed
 const itemCount = computed(() => items.value.length)
 
 // Enrich cart items with full product data from products store
 const enrichedItems = computed(() => {
-  return items.value.map(cartItem => {
+  return items.value.map((cartItem: CartItem) => {
     // Find the full product data from products store
     const fullProduct = productsStore.products.find(p => p.id === cartItem.id) || 
                        productsStore.featuredProducts.find(p => p.id === cartItem.id) ||
@@ -284,7 +286,7 @@ const enrichedItems = computed(() => {
         // Update stock status
         inStock: fullProduct.inStock,
         stockQuantity: fullProduct.stockQuantity
-      }
+      } as Product & { quantity: number }
     }
     
     // Fallback to cart item if product not found in store
@@ -294,7 +296,7 @@ const enrichedItems = computed(() => {
 
 // Check if any items are out of stock
 const hasOutOfStockItems = computed(() => {
-  return enrichedItems.value.some(item => !item.inStock || item.stockQuantity === 0)
+  return enrichedItems.value.some((item: Product & { quantity: number }) => !item.inStock || item.stockQuantity === 0)
 })
 
 // Format currency using the products store's price formatting
@@ -340,12 +342,12 @@ const checkout = () => {
     message: $t('checkoutProcessing'),
     type: 'success'
   })
-  closeCartAction()
+  cartStore.closeCart()
   router.push('/checkout')
 }
 
 const continueShopping = () => {
-  closeCartAction()
+  cartStore.closeCart()
   showNotification({
     title: $t('continueShopping'),
     message: $t('keepShopping'),

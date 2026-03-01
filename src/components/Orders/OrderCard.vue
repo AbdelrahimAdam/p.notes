@@ -126,15 +126,16 @@ import { useLanguageStore } from '@/stores/language'
 import { useOrdersStore } from '@/stores/orders'
 import { authNotification } from '@/utils/notifications'
 import { showConfirmation } from '@/utils/confirmation'
+import type { Order } from '@/types'
 
 const props = defineProps<{
-  order: any
+  order: Order
 }>()
 
 const emit = defineEmits<{
-  (e: 'view', order: any): void
-  (e: 'reorder', order: any): void
-  (e: 'cancel', order: any): void
+  (e: 'view', order: Order): void
+  (e: 'reorder', order: Order): void
+  (e: 'cancel', order: Order): void
   (e: 'download-invoice', orderId: string): void
 }>()
 
@@ -179,7 +180,7 @@ const handleReorder = async () => {
     type: 'info'
   })
   if (confirmed) {
-    const success = await ordersStore.reorder(props.order.id)
+    const success = await ordersStore.reorder(props.order.id) as unknown as boolean
     if (success) {
       emit('reorder', props.order)
     }
@@ -195,7 +196,7 @@ const handleCancel = async () => {
     type: 'warning'
   })
   if (confirmed) {
-    const success = await ordersStore.cancelOrder(props.order.id)
+    const success = await ordersStore.cancelOrder(props.order.id) as unknown as boolean
     if (success) {
       emit('cancel', props.order)
       authNotification.loggedIn(t('Order cancelled successfully'))

@@ -20,7 +20,7 @@ import type { Product, ProductFormData } from '@/types'
 
 // Products Collection
 const PRODUCTS_COLLECTION = 'products'
-const ADMINS_COLLECTION = 'admins'
+// const ADMINS_COLLECTION = 'admins' // Unused - commented out
 
 // Product Operations
 export const getProducts = async (constraints: QueryConstraint[] = []): Promise<Product[]> => {

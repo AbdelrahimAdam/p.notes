@@ -124,12 +124,10 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
-import { showNotification } from '@/utils/notifications'
+import { showSuccess } from '@/utils/notifications' // ✅ changed from showNotification
 
-const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useLanguageStore()
 
@@ -188,7 +186,7 @@ const handleSubmit = async () => {
     form.email = ''
     
     // Show notification
-    showNotification.success(t('resetLinkSent'))
+    showSuccess(t('resetLinkSent'), '') // ✅ corrected
     
   } catch (err: any) {
     console.error('Password reset error:', err)

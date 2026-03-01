@@ -641,8 +641,8 @@
     <!-- Product Form Modal -->
     <ProductFormModal
       v-if="showProductForm"
-      :product="editingProduct || undefined"   <!-- Fixed: null to undefined -->
-      :brand="selectedBrandForProduct || undefined"   <!-- Fixed: null to undefined -->
+      :product="editingProduct || undefined"
+      :brand="selectedBrandForProduct || undefined"
       @close="closeProductForm"
       @save="handleSaveProduct"
       @saved="handleProductSaved"
@@ -1069,7 +1069,6 @@ const handleProductSaved = () => {
   closeProductForm()
 }
 
-// ========== UPDATED: handleSaveProduct with update logic ==========
 const handleSaveProduct = async (data: {
   productData: any
   brandId?: string
@@ -1240,6 +1239,10 @@ onMounted(async () => {
     console.error('Error loading products:', error)
   }
 })
+
+// Mark handlers as used (they are called in template)
+void handleProductSaved;
+void handleSaveProduct;
 </script>
 
 <style scoped>

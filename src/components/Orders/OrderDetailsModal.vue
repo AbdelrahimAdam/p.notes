@@ -29,7 +29,7 @@
         <!-- Content -->
         <div class="max-h-[70vh] overflow-y-auto">
           <div class="p-6 space-y-6">
-            <!-- Order Status Timeline (new) -->
+            <!-- Order Status Timeline -->
             <div class="border-b border-gray-200 pb-4">
               <h3 class="text-sm font-medium text-gray-900 mb-4 flex items-center">
                 <svg class="w-4 h-4 mr-2 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@
                 </svg>
                 {{ t('Order Timeline') }}
               </h3>
-              <div class="flow-root">
+              <div v-if="order.statusHistory && order.statusHistory.length" class="flow-root">
                 <ul class="-mb-8">
                   <li v-for="(statusItem, index) in order.statusHistory" :key="index" class="relative pb-8">
                     <div v-if="index !== order.statusHistory.length - 1" class="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></div>
@@ -56,7 +56,7 @@
                             <span v-if="statusItem.note" class="text-gray-500"> - {{ statusItem.note }}</span>
                           </p>
                           <p class="mt-0.5 text-xs text-gray-500">
-                            {{ formatDateTime(statusItem.timestamp) }}
+                            {{ formatDateTime(statusItem.date) }}
                             <span v-if="statusItem.updatedBy" class="ml-2">by {{ statusItem.updatedBy }}</span>
                           </p>
                         </div>
@@ -67,7 +67,7 @@
               </div>
             </div>
 
-            <!-- Order Status (existing, but we keep it for quick reference) -->
+            <!-- Order Status (quick reference) -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
               <div>
                 <h3 class="text-sm font-medium text-gray-500 mb-1">{{ t('Order Status') }}</h3>
@@ -209,21 +209,21 @@
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
                   <span class="text-gray-600">{{ t('Subtotal') }}</span>
-                  <span class="font-medium text-gray-900">{{ formatCurrency(order.subtotal) }} EGP</span>
+                  <span class="font-medium text-gray-900">{{ formatCurrency(order.subtotal || 0) }} EGP</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">{{ t('Shipping') }}</span>
                   <span class="font-medium text-gray-900">
-                    {{ order.shipping === 0 ? t('Free') : formatCurrency(order.shipping) + ' EGP' }}
+                    {{ order.shipping === 0 ? t('Free') : formatCurrency(order.shipping || 0) + ' EGP' }}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">{{ t('Tax') }}</span>
-                  <span class="font-medium text-gray-900">{{ formatCurrency(order.tax) }} EGP</span>
+                  <span class="font-medium text-gray-900">{{ formatCurrency(order.tax || 0) }} EGP</span>
                 </div>
                 <div class="flex justify-between text-base font-medium pt-3 border-t border-gray-300">
                   <span class="text-gray-900">{{ t('Total') }}</span>
-                  <span class="text-gold-600">{{ formatCurrency(order.total) }} EGP</span>
+                  <span class="text-gold-600">{{ formatCurrency(order.total || 0) }} EGP</span>
                 </div>
               </div>
             </div>
@@ -281,15 +281,16 @@ import { useLanguageStore } from '@/stores/language'
 import { useOrdersStore } from '@/stores/orders'
 import { authNotification } from '@/utils/notifications'
 import { showConfirmation } from '@/utils/confirmation'
+import type { Order } from '@/types' // removed unused StatusHistoryItem
 
 const props = defineProps<{
-  order: any
+  order: Order
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'reorder', order: any): void
-  (e: 'cancel', order: any): void
+  (e: 'reorder', order: Order): void
+  (e: 'cancel', order: Order): void
   (e: 'download-invoice', orderId: string): void
 }>()
 
@@ -383,7 +384,7 @@ const handleReorder = async () => {
     type: 'info'
   })
   if (confirmed) {
-    const success = await ordersStore.reorder(props.order.id)
+    const success = await ordersStore.reorder(props.order.id) as unknown as boolean
     if (success) {
       emit('reorder', props.order)
       emit('close')
@@ -400,7 +401,7 @@ const handleCancel = async () => {
     type: 'warning'
   })
   if (confirmed) {
-    const success = await ordersStore.cancelOrder(props.order.id)
+    const success = await ordersStore.cancelOrder(props.order.id) as unknown as boolean
     if (success) {
       emit('cancel', props.order)
       authNotification.loggedIn(t('Order cancelled successfully'))
@@ -442,7 +443,7 @@ const handleDownloadInvoice = () => {
 .overflow-y-auto::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
-
+ 
 .overflow-y-auto::-webkit-scrollbar-thumb {
   background: #d4af37;
   border-radius: 3px;

@@ -174,7 +174,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
-import { showSuccess, showError } from '@/utils/notifications' // ✅ corrected imports
+import { showSuccess } from '@/utils/notifications'
 
 const route = useRoute()
 const router = useRouter()
@@ -262,7 +262,7 @@ const handleSubmit = async () => {
     await authStore.confirmPasswordReset(token.value, form.password)
     
     success.value = t('passwordResetSuccess')
-    showSuccess(t('passwordResetSuccess')) // ✅ fixed
+    showSuccess(t('passwordResetSuccess'), '')
     
     // Redirect to login after 3 seconds
     setTimeout(() => {

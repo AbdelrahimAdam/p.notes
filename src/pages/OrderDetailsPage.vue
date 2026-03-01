@@ -211,7 +211,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useOrdersStore } from '@/stores/orders'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
-import { showError, showSuccess } from '@/utils/notifications' // ✅ corrected import
+import { showError, showSuccess } from '@/utils/notifications'
 import { showConfirmation } from '@/utils/confirmation'
 
 const route = useRoute()
@@ -289,10 +289,10 @@ const verifyEmail = async () => {
     if (fetchedOrder && fetchedOrder.customer.email === verificationEmail.value) {
       isVerified.value = true
     } else {
-      showError(t('Invalid email address')) // ✅ corrected
+      showError(t('Invalid email address'), '')
     }
   } catch (err) {
-    showError(t('Failed to verify email')) // ✅ corrected
+    showError(t('Failed to verify email'), '')
   } finally {
     verifying.value = false
   }
@@ -324,7 +324,7 @@ const cancelOrder = async () => {
   
   if (confirmed) {
     await ordersStore.cancelOrder(order.value.id, 'Cancelled by customer')
-    showSuccess(t('Order cancelled successfully')) // ✅ corrected
+    showSuccess(t('Order cancelled successfully'), '')
     await ordersStore.fetchOrderById(order.value.id)
   }
 }

@@ -350,7 +350,9 @@ const pageDescription = computed(() => {
   if (typeof description === 'string') return description
   // description is an object with en/ar
   const lang = currentLanguage.value === 'en' || currentLanguage.value === 'ar' ? currentLanguage.value : 'en'
-  return description[lang] || description.en || ''
+  // Cast to Record<string, string> to allow indexing
+  const descriptionObj = description as Record<string, string>
+  return descriptionObj[lang] || descriptionObj.en || ''
 })
 
 const currentYear = computed(() => new Date().getFullYear())
@@ -438,7 +440,7 @@ const vClickOutside = {
         binding.value()
       }
     }
-    (el as any).__clickOutsideHandler = handler
+    ;(el as any).__clickOutsideHandler = handler
     document.addEventListener('click', handler)
   },
   unmounted(el: HTMLElement) {
@@ -446,6 +448,13 @@ const vClickOutside = {
     if (handler) {
       document.removeEventListener('click', handler)
     }
+  }
+}
+
+// Resize handler defined outside lifecycle hooks so both onMounted and onUnmounted can access it
+const handleResize = () => {
+  if (window.innerWidth >= 1024) {
+    isMobileMenuOpen.value = false
   }
 }
 
@@ -458,19 +467,12 @@ onMounted(() => {
     document.documentElement.classList.add('dark')
   }
   
-  // Close mobile menu on larger screens
-  const handleResize = () => {
-    if (window.innerWidth >= 1024) {
-      isMobileMenuOpen.value = false
-    }
-  }
-  
+  // Add resize listener
   window.addEventListener('resize', handleResize)
-  
-  // Cleanup will be done in onUnmounted
-  onUnmounted(() => {
-    window.removeEventListener('resize', handleResize)
-  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 
 // Watch for auth changes

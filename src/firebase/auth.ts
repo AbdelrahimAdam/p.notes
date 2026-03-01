@@ -7,7 +7,7 @@ import {
   type User
 } from 'firebase/auth'
 import { auth } from './config'
-import { doc, getDoc, setDoc, getDocs, collection, query, where } from 'firebase/firestore'
+import { doc, getDoc, setDoc, getDocs, collection, query, where, deleteDoc } from 'firebase/firestore'
 import { db } from './config'
 
 export interface AdminUser {

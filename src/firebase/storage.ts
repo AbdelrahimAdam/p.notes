@@ -2,8 +2,7 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
-  deleteObject,
-  type StorageReference
+  deleteObject
 } from 'firebase/storage'
 import { storage } from './config'
 

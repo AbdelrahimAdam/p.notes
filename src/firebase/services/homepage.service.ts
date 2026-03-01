@@ -3,8 +3,7 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  updateDoc, 
-  deleteField 
+  updateDoc
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '@/firebase/config'

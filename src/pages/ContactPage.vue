@@ -282,7 +282,7 @@
               class="w-full flex items-center justify-between p-6 text-left"
               :class="{ 'space-x-reverse': isRTL }"
             >
-              <span class="font-bold text-gray-900">{{ faq.question[currentLanguage] }}</span>
+              <span class="font-bold text-gray-900">{{ getLocalizedText(faq.question) }}</span>
               <svg 
                 class="w-5 h-5 text-gray-500 transition-transform duration-200"
                 :class="{ 'rotate-180': openFAQ === index }"
@@ -298,7 +298,7 @@
               v-if="openFAQ === index"
               class="px-6 pb-6 text-gray-600"
             >
-              {{ faq.answer[currentLanguage] }}
+              {{ getLocalizedText(faq.answer) }}
             </div>
           </div>
         </div>
@@ -314,6 +314,11 @@ import SEOHead from '@/components/UI/SEOHead.vue'
 
 const languageStore = useLanguageStore()
 const { currentLanguage, isRTL, t } = languageStore
+
+// Helper to get localized text
+const getLocalizedText = (obj: { en: string; ar: string }) => {
+  return obj[currentLanguage as 'en' | 'ar']
+}
 
 // Form state
 const form = ref({

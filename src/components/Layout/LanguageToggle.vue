@@ -37,9 +37,12 @@ const languages = {
     flag: '🇸🇦',
     direction: 'rtl'
   }
-}
+} as const
 
-const currentFlag = computed(() => languages[currentLanguage.value].flag)
+const currentFlag = computed(() => {
+  const lang = currentLanguage.value as keyof typeof languages
+  return languages[lang].flag
+})
 
 const toggleLanguage = () => {
   const newLang = currentLanguage.value === 'en' ? 'ar' : 'en'
@@ -73,7 +76,8 @@ const toggleLanguage = () => {
 // Initialize on mount
 import { onMounted } from 'vue'
 onMounted(() => {
-  const langData = languages[currentLanguage.value]
+  const lang = currentLanguage.value as keyof typeof languages
+  const langData = languages[lang]
   document.documentElement.dir = langData.direction
   document.documentElement.lang = langData.code
   

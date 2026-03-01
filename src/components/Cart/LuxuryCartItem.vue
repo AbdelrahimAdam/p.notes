@@ -11,7 +11,7 @@
       <div class="item-image-container">
         <img
           :src="item.imageUrl"
-          :alt="item.name[currentLanguage]"
+          :alt="getLocalizedName(item.name)"
           class="item-image"
           loading="lazy"
         />
@@ -27,7 +27,7 @@
     <!-- Product Info -->
     <div class="item-info">
       <div class="item-header">
-        <h4 class="item-name">{{ item.name[currentLanguage] }}</h4>
+        <h4 class="item-name">{{ getLocalizedName(item.name) }}</h4>
         <p class="item-specs">{{ item.size }} • {{ item.concentration || 'Eau de Parfum' }}</p>
       </div>
       
@@ -119,7 +119,7 @@
 <script setup lang="ts">
 import type { CartItem } from '@/types'
 import { useLanguageStore } from '@/stores/language'
-import { showConfirmation } from '@/utils/notifications'
+import { showConfirmation } from '@/utils/confirmation'
 
 interface Props {
   item: CartItem
@@ -133,6 +133,14 @@ const emit = defineEmits<{
 
 const languageStore = useLanguageStore()
 const { currentLanguage, isRTL, t: $t } = languageStore
+
+// Helper to get localized name
+const getLocalizedName = (name: string | { en: string; ar: string }): string => {
+  if (typeof name === 'string') return name
+  // Type-safe indexing: currentLanguage is a string ('en' | 'ar')
+  const lang = currentLanguage as 'en' | 'ar'
+  return name[lang] || name.en || ''
+}
 
 // Format price with Egyptian Pound
 const formatPrice = (price: number) => {

@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- NEW: Gender (Classification) Filter -->
+    <!-- Gender (Classification) Filter -->
     <div>
       <h3 class="text-lg font-display-en font-bold mb-4">
         {{ currentLanguage === 'en' ? 'Gender' : 'الجنس' }}
@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue' // removed unused 'ref'
+import { computed } from 'vue'
 import type { FilterOptions } from '@/types'
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
@@ -180,12 +180,13 @@ const emit = defineEmits<{
 const languageStore = useLanguageStore()
 const productsStore = useProductsStore()
 
+// currentLanguage is a string, not a ref
 const { currentLanguage, isRTL } = languageStore
 const { categories, products } = productsStore
 
 // Safe language for indexing (only 'en' or 'ar')
 const safeLang = computed(() => {
-  const lang = currentLanguage.value
+  const lang = currentLanguage
   return lang === 'en' || lang === 'ar' ? lang : 'en'
 })
 

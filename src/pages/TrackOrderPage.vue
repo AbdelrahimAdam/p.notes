@@ -167,6 +167,11 @@ const loading = ref(false)
 const trackingResult = ref(false)
 const order = ref<any>(null)
 
+// Format currency function
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-EG').format(amount)
+}
+
 // Define tracking steps with optional date
 interface TrackingStep {
   label: string
@@ -296,7 +301,7 @@ const getStatusText = (status: string) => {
 const copyTrackingNumber = async () => {
   if (order.value?.trackingNumber) {
     await navigator.clipboard.writeText(order.value.trackingNumber)
-    showSuccess(t('Tracking number copied!'))
+    showSuccess(t('Tracking number copied!'), '')
   }
 }
 </script>

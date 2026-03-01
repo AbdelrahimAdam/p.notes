@@ -971,9 +971,8 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue' // ✅ Added watch import
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useLanguageStore } from '@/stores/language'
 import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
@@ -1159,7 +1158,7 @@ const getCategoryDisplayName = (category: Category) => {
   if (!category) return ''
   if (typeof category === 'string') return category
   // Use id as fallback instead of name (which doesn't exist on Category)
-  return category[currentLanguage.value as keyof Category] || category.id || ''
+  return category[currentLanguage as keyof Category] || category.id || ''
 }
 
 const isValidUrl = (url: string): boolean => {

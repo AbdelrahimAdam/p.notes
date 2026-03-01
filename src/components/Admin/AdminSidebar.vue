@@ -298,13 +298,11 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router' // route not used, import kept for potential use
+import { useRouter } from 'vue-router' // only useRouter needed
 import { useLanguageStore } from '@/stores/language'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
-// route not used – prefix with underscore to avoid unused warning
-const _route = useRoute()
 const languageStore = useLanguageStore()
 const authStore = useAuthStore()
 

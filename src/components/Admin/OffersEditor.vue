@@ -345,7 +345,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage' // removed unused getStorage
 import { storage } from '@/firebase/config' // Adjust path if needed
 import { useLanguageStore } from '@/stores/language'

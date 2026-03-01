@@ -405,9 +405,13 @@ const viewOrder = (order: any) => {
 }
 
 const handleReorder = async (order: any) => {
-  const success = await ordersStore.reorder(order.id)
-  if (success) {
+  try {
+    await ordersStore.reorder(order.id)
+    // Always navigate to cart after reorder (assume success)
     router.push('/cart')
+  } catch (error) {
+    // Error is already handled in the store and notifications shown
+    console.error('Reorder failed', error)
   }
 }
 
@@ -421,9 +425,8 @@ const handleCancelOrder = async (order: any) => {
   })
   
   if (confirmed) {
-    // Call cancelOrder – note: this may return void, but we ignore the result
+    // Call cancelOrder – store handles errors and updates
     await ordersStore.cancelOrder(order.id)
-    // No need to check success; the store will update automatically
   }
 }
 

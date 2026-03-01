@@ -169,8 +169,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-// homepageStore not used – removed import
-import { useLanguageStore } from '@/stores/language'
 
 const props = defineProps<{
   heroBanner: {
@@ -184,9 +182,6 @@ const emit = defineEmits<{
   update: [data: any]
   changeDetected: []
 }>()
-
-const languageStore = useLanguageStore()
-const { t } = languageStore
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)

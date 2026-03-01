@@ -257,8 +257,8 @@ const triggerFileUpload = () => {
 const handleFileUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    const _file = input.files[0] // file is intentionally unused for now
-    showInfo(t('uploadingImage'))
+    // File is intentionally unused for now, just show notification
+    showInfo(t('uploadingImage'), '')
   }
 }
 
@@ -273,9 +273,9 @@ const handleSubmit = async () => {
       dob: form.dob
     })
     
-    showSuccess(t('profileUpdated'))
+    showSuccess(t('profileUpdated'), '')
   } catch (error) {
-    showError(t('updateFailed'))
+    showError(t('updateFailed'), '')
   } finally {
     saving.value = false
   }
@@ -283,20 +283,20 @@ const handleSubmit = async () => {
 
 const changePassword = async () => {
   if (passwordForm.new !== passwordForm.confirm) {
-    showError(t('passwordsDoNotMatch'))
+    showError(t('passwordsDoNotMatch'), '')
     return
   }
   
   try {
     await authStore.changeCustomerPassword(passwordForm.current, passwordForm.new)
-    showSuccess(t('passwordUpdated'))
+    showSuccess(t('passwordUpdated'), '')
     
     // Clear password form
     passwordForm.current = ''
     passwordForm.new = ''
     passwordForm.confirm = ''
   } catch (error) {
-    showError(t('passwordUpdateFailed'))
+    showError(t('passwordUpdateFailed'), '')
   }
 }
 

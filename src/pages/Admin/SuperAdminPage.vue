@@ -207,7 +207,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useLanguageStore } from '@/stores/language'
 
 const languageStore = useLanguageStore()

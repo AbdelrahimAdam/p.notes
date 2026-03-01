@@ -148,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLanguageStore } from '@/stores/language'
 import { useBrandsStore } from '@/stores/brands'

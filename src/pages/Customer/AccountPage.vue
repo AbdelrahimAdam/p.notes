@@ -259,8 +259,8 @@
               <div v-else class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div v-for="address in addresses.slice(0, 2)" :key="address.id" class="border border-gray-200 rounded-lg p-4">
-                    <p class="font-medium text-gray-900">{{ address.name }}</p>
-                    <p class="text-sm text-gray-600 mt-1">{{ address.address }}</p>
+                    <p class="font-medium text-gray-900">{{ address.fullName }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ address.addressLine1 }}</p>
                     <p class="text-sm text-gray-600">{{ address.city }}, {{ address.country }}</p>
                     <p class="text-sm text-gray-600">{{ address.phone }}</p>
                   </div>
@@ -367,7 +367,7 @@ const loadUserData = async () => {
   try {
     // Load recent orders
     await ordersStore.fetchOrders({
-      userId: customer.value.id,
+      userId: customer.value.uid, // Changed from id to uid
       limit: 5
     })
     recentOrders.value = ordersStore.orders.slice(0, 5)
@@ -397,4 +397,3 @@ onMounted(() => {
   loadUserData()
 })
 </script>
-

@@ -496,7 +496,6 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLanguageStore } from '@/stores/language'
-import { useProductsStore } from '@/stores/products'
 import { useBrandsStore } from '@/stores/brands'
 import { useCartStore } from '@/stores/cart'
 import ProductGrid from '@/components/Products/ProductGrid.vue'
@@ -507,18 +506,16 @@ import type { Product } from '@/types'
 const route = useRoute()
 const router = useRouter()
 const languageStore = useLanguageStore()
-const productsStore = useProductsStore()
 const brandsStore = useBrandsStore()
 const cartStore = useCartStore()
 
-const { t, isRTL, currentLanguage } = languageStore
+const { t, isRTL } = languageStore // currentLanguage is not used
 
 // State
 const error = ref<string | null>(null)
 const sortBy = ref('newest')
 const inStockOnly = ref(false)
 const concentrationFilter = ref('')
-const showBrandDetails = ref(false)
 const defaultBrandImage = '/images/brand-default.jpg'
 const productsLoading = ref(false)
 const searchQuery = ref('')
@@ -657,7 +654,7 @@ const seoTitle = computed(() =>
 const seoDescription = computed(() => 
   currentBrand.value?.signature || 
   currentBrand.value?.description ||
-  t('Explore our collection of {brand} luxury perfumes', { brand: currentBrand.value?.name })
+  t('Explore our collection of {brand} luxury perfumes', { brand: currentBrand.value?.name || '' })
 )
 
 const brandImage = computed(() => currentBrand.value?.image || defaultBrandImage)
@@ -766,27 +763,7 @@ const clearAllFilters = () => {
   showFilters.value = false
 }
 
-const getSortLabel = (sortValue: string) => {
-  const labels: Record<string, string> = {
-    'newest': t('Newest'),
-    'price-low': t('Price: Low to High'),
-    'price-high': t('Price: High to Low'),
-    'name-asc': t('Name'),
-    'rating': t('Highest Rated')
-  }
-  return labels[sortValue] || sortValue
-}
-
 // Format helpers
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat(currentLanguage.value === 'ar' ? 'ar-EG' : 'en-EG', {
-    style: 'currency',
-    currency: 'EGP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price)
-}
-
 const formatCompactPrice = (price: number) => {
   if (price >= 1000) {
     return `EGP ${(price / 1000).toFixed(1)}k`

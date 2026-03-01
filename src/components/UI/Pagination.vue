@@ -60,7 +60,7 @@
             <!-- Page button -->
             <button
               v-else
-              @click="goToPage(page)"
+              @click="goToPage(page as number)"
               :class="[
                 'relative inline-flex items-center border px-4 py-2 text-sm font-medium',
                 currentPage === page
@@ -115,11 +115,11 @@ const endItem = computed(() => {
   return Math.min(props.currentPage * props.perPage, props.totalItems)
 })
 
-const displayedPages = computed(() => {
+const displayedPages = computed<(number | string)[]>(() => {
   const delta = 2 // Number of pages to show on each side of current page
-  const range: (number | string)[] = []
+  const range: number[] = []
   const rangeWithDots: (number | string)[] = []
-  let l: number
+  let l: number | undefined
 
   for (let i = 1; i <= props.totalPages; i++) {
     if (
@@ -132,7 +132,7 @@ const displayedPages = computed(() => {
   }
 
   range.forEach((i) => {
-    if (l) {
+    if (l !== undefined) {
       if (i - l === 2) {
         rangeWithDots.push(l + 1)
       } else if (i - l !== 1) {
@@ -140,7 +140,7 @@ const displayedPages = computed(() => {
       }
     }
     rangeWithDots.push(i)
-    l = i as number
+    l = i
   })
 
   return rangeWithDots

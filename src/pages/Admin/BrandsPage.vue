@@ -139,7 +139,6 @@
                 :key="category"
                 :value="category"
               >
-                <!-- Fixed: handle undefined category with fallback -->
                 {{ t(category || '') }}
               </option>
             </select>
@@ -365,7 +364,7 @@
     <!-- Add/Edit Brand Modal -->
     <BrandFormModal
       v-if="showAddModal || editingBrand"
-      :brand="editingBrand || undefined"   <!-- Fixed: null to undefined -->
+      :brand="editingBrand || undefined"
       :mode="editingBrand ? 'edit' : 'add'"
       @close="closeModal"
       @saved="handleBrandSaved"
@@ -686,6 +685,8 @@ const handleBrandSaved = () => {
   closeModal()
   loadBrands()
 }
+// Mark as used for TypeScript (called in template)
+void handleBrandSaved;
 
 const clearFilters = () => {
   searchQuery.value = ''

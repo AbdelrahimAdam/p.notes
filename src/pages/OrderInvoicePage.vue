@@ -161,14 +161,7 @@ import { useRoute } from 'vue-router'
 import { useOrdersStore } from '@/stores/orders'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
-import { showError, showSuccess } from '@/utils/notifications' // ✅ corrected import
-
-// Type declaration for html2pdf
-declare module 'html2pdf.js' {
-  const html2pdf: any
-  export default html2pdf
-}
-import html2pdf from 'html2pdf.js'
+import { showError, showSuccess } from '@/utils/notifications'
 
 const route = useRoute()
 const ordersStore = useOrdersStore()
@@ -223,10 +216,10 @@ const verifyEmail = async () => {
       order.value = fetchedOrder
       isVerified.value = true
     } else {
-      showError(t('Invalid email address')) // ✅ corrected
+      showError(t('Invalid email address'), '')
     }
   } catch (err) {
-    showError(t('Failed to verify email')) // ✅ corrected
+    showError(t('Failed to verify email'), '')
   } finally {
     verifying.value = false
   }
@@ -238,17 +231,36 @@ const printInvoice = () => {
 
 const downloadInvoice = async () => {
   const element = document.getElementById('invoice-content')
-  if (element) {
+  if (!element) return
+
+  try {
+    // Dynamically import html2pdf with error handling
+    const html2pdfModule = await import('html2pdf.js').catch((err) => {
+      console.error('Failed to load html2pdf.js:', err)
+      showError(t('PDF library not available. Please install html2pdf.js'), '')
+      return null
+    })
+
+    if (!html2pdfModule) return
+
+    const html2pdf = html2pdfModule.default
     const opt = {
       margin: 1,
       filename: `invoice-${order.value.orderNumber}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      jsPDF: { 
+        unit: 'in' as const, 
+        format: 'letter' as const, 
+        orientation: 'portrait' as const 
+      }
     }
     
     await html2pdf().set(opt).from(element).save()
-    showSuccess(t('Invoice downloaded successfully')) // ✅ corrected
+    showSuccess(t('Invoice downloaded successfully'), '')
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    showError(t('Failed to generate PDF. Please try again.'), '')
   }
 }
 
@@ -265,7 +277,7 @@ onMounted(async () => {
         isVerified.value = true
       }
     } catch (err) {
-      showError(t('Order not found')) // ✅ corrected
+      showError(t('Order not found'), '')
     } finally {
       loading.value = false
     }

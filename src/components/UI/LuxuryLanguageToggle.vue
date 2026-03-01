@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useLanguageStore } from '@/stores/language'
 
 const languageStore = useLanguageStore()
@@ -75,14 +75,14 @@ const closeTimer = ref<number | null>(null)
 // Available languages - only English and Arabic
 const availableLanguages = computed(() => [
   {
-    code: 'en',
+    code: 'en' as const,
     name: 'English',
     native: 'English',
     flag: '🇺🇸',
     direction: 'ltr'
   },
   {
-    code: 'ar',
+    code: 'ar' as const,
     name: 'Arabic',
     native: 'العربية',
     flag: '🇸🇦',
@@ -92,7 +92,7 @@ const availableLanguages = computed(() => [
 
 // Current language object
 const currentLanguageObj = computed(() => 
-  availableLanguages.value.find(lang => lang.code === currentLanguage.value) || availableLanguages.value[0]
+  availableLanguages.value.find(lang => lang.code === currentLanguage) || availableLanguages.value[0]
 )
 
 // Clear close timer
@@ -125,13 +125,9 @@ const closeLanguages = () => {
 }
 
 // Select language
-const selectLanguage = async (language: typeof availableLanguages.value[0]) => {
-  try {
-    await setLanguage(language.code)
-    closeLanguages()
-  } catch (error) {
-    console.error('Failed to change language:', error)
-  }
+const selectLanguage = (language: typeof availableLanguages.value[0]) => {
+  setLanguage(language.code)
+  closeLanguages()
 }
 
 // Handle click outside
@@ -157,26 +153,22 @@ const handleEscapeKey = (e: KeyboardEvent) => {
 
 // Lifecycle
 onMounted(() => {
-  // Initialize language store
   initialize()
-  
-  // Add event listeners
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscapeKey)
 })
 
 onUnmounted(() => {
-  // Clean up timer
   cancelCloseTimer()
-  
-  // Remove event listeners
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleEscapeKey)
 })
 
 // Watch for language changes to update direction
-watch(() => currentLanguage.value, (newLang) => {
-  document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr'
+watch(() => currentLanguage, (newLang) => {
+  if (!newLang) return
+  const dir = newLang === 'ar' ? 'rtl' : 'ltr'
+  document.documentElement.dir = dir
   document.documentElement.lang = newLang
 }, { immediate: true })
 </script>

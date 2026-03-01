@@ -76,17 +76,20 @@ export class AdminService {
 
       // 3. Create admin document in Firestore
       const adminRef = doc(db, ADMIN_COLLECTION, user.uid)
-      const adminDoc: Omit<AdminUser, 'uid'> = {
+      
+      // Build document data with flexible type to include phoneNumber
+      const adminDataAny = adminData as any
+      const adminDocData = {
         email: adminData.email,
         displayName: adminData.displayName || '',
         role: adminData.role || 'admin',
-        isActive: (adminData as any).isActive ?? true,
-        createdAt: serverTimestamp() as any,
-        lastLoginAt: serverTimestamp() as any,
-        phoneNumber: (adminData as any).phoneNumber || ''
+        isActive: adminDataAny.isActive ?? true,
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        phoneNumber: adminDataAny.phoneNumber || ''
       }
-
-      await setDoc(adminRef, adminDoc)
+      
+      await setDoc(adminRef, adminDocData)
 
       // 4. Also add to users collection for consistency
       const userRef = doc(db, USERS_COLLECTION, user.uid)
@@ -94,17 +97,17 @@ export class AdminService {
         email: adminData.email,
         displayName: adminData.displayName || '',
         role: adminData.role || 'admin',
-        isActive: (adminData as any).isActive ?? true,
-        createdAt: serverTimestamp() as any,
+        isActive: adminDataAny.isActive ?? true,
+        createdAt: serverTimestamp(),
         isAdmin: true
       }, { merge: true })
 
       return {
         uid: user.uid,
-        ...adminDoc,
+        ...adminDocData,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString()
-      }
+      } as AdminUser
     } catch (error: any) {
       console.error('Error creating admin:', error)
       

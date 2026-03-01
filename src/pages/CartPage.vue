@@ -242,7 +242,7 @@ const cartStore = useCartStore()
 const homepageStore = useHomepageStore()
 const authStore = useAuthStore()
 
-const { currentLanguage, isRTL, t } = languageStore
+const { isRTL, t } = languageStore
 
 // Dark mode from homepage settings
 const isDarkMode = computed(() => homepageStore.homepageData?.settings?.isDarkMode || false)

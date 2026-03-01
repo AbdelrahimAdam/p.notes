@@ -220,12 +220,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useLanguageStore } from '@/stores/language'
 import SEOHead from '@/components/UI/SEOHead.vue'
 
 const languageStore = useLanguageStore()
-
 const { currentLanguage, isRTL } = languageStore
 </script>
 

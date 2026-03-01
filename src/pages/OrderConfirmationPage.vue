@@ -163,13 +163,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useOrdersStore } from '@/stores/orders'
 import { useLanguageStore } from '@/stores/language'
-import { showNotification } from '@/utils/notifications'
 
 const route = useRoute()
-const router = useRouter()
 const ordersStore = useOrdersStore()
 const { t } = useLanguageStore()
 

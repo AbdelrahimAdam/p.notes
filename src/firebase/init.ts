@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, serverTimestamp, updateDoc, arrayUnion } from 'firebase/firestore'
+import { collection, doc, setDoc, serverTimestamp, updateDoc, arrayUnion, getDocs } from 'firebase/firestore'
 import { db } from './config'
 
 // Initialize with sample brands and products

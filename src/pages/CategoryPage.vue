@@ -67,7 +67,6 @@
               <div class="relative">
                 <select
                   v-model="filters.sortBy"
-                  @change="updateFilters"
                   class="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg 
                          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 
                          bg-white"
@@ -182,11 +181,11 @@ const categoryName = computed(() => {
       return t('Unisex')
     }
   }
-  return currentCategory.value?.[currentLanguage.value] || categorySlug.value
+  return currentCategory.value?.[currentLanguage as 'en' | 'ar'] || categorySlug.value
 })
 
 const categoryDescription = computed(() => {
-  return currentCategory.value?.description?.[currentLanguage.value]
+  return currentCategory.value?.description?.[currentLanguage as 'en' | 'ar']
 })
 
 const categoryImage = computed(() => {
@@ -219,49 +218,44 @@ const formatPrice = (price: number): string => {
   }).format(price)
 }
 
-// Process products to ensure prices are in EGP
-const processedProducts = computed(() => {
-  return products.map(product => ({
-    ...product,
-    formattedPrice: formatPrice(product.price),
-    formattedSalePrice: product.salePrice ? formatPrice(product.salePrice) : null
-  }))
-})
-
 // 🔁 CORRECTED FILTER LOGIC
 const filteredProducts = computed(() => {
-  // Start with all products (processed)
-  let filtered = processedProducts.value
+  // Start with all raw products
+  let filteredRaw = products
 
-  // Apply store filters (search, brand, price, etc.)
-  filtered = filterProducts(filters.value)
+  // Apply store filters (search, brand, price range, etc.)
+  filteredRaw = filterProducts(filters.value)
 
-  // Now apply category/gender specific filter
+  // Now apply category/gender specific filter on raw products
   if (categorySlug.value && categorySlug.value !== 'best-sellers' && categorySlug.value !== 'new-arrivals') {
     if (isGenderSlug.value) {
       const classification = GENDER_MAP[categorySlug.value.toLowerCase()]
       if (classification) {
-        filtered = filtered.filter(p => p.classification === classification)
+        filteredRaw = filteredRaw.filter(p => p.classification === classification)
       }
     } else {
-      // Regular category filter
-      filtered = filtered.filter(p => p.category === categorySlug.value)
+      filteredRaw = filteredRaw.filter(p => p.category === categorySlug.value)
     }
   }
 
-  // Special categories
+  // Special categories (apply on raw products)
   if (categorySlug.value === 'best-sellers') {
-    filtered = filtered.filter(p => p.isBestSeller)
+    filteredRaw = filteredRaw.filter(p => p.isBestSeller)
   } else if (categorySlug.value === 'new-arrivals') {
     const oneMonthAgo = new Date()
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
-    filtered = filtered.filter(p => {
+    filteredRaw = filteredRaw.filter(p => {
       const date = p.createdAt?.toDate ? p.createdAt.toDate() : new Date(p.createdAt?.seconds * 1000)
       return date > oneMonthAgo
     })
   }
 
-  return filtered
+  // Now map to processed products with formatted prices
+  return filteredRaw.map(product => ({
+    ...product,
+    formattedPrice: formatPrice(product.price),
+    formattedSalePrice: (product as any).salePrice ? formatPrice((product as any).salePrice) : null
+  }))
 })
 
 // Methods

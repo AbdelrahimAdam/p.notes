@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue' // ✅ added onUnmounted
 import type { ConfirmationOptions } from '@/utils/notifications'
 import { useLanguageStore } from '@/stores/language'
 

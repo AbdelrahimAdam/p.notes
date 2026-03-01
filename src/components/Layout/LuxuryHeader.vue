@@ -75,7 +75,6 @@
                 </div>
               </div>
             </li>
-            <!-- NEW: Unisex Link -->
             <li class="luxury-nav-item">
               <router-link to="/category/unisex" class="luxury-nav-link" active-class="active">
                 {{ languageStore.t('unisex') }}
@@ -128,7 +127,7 @@
                 </svg>
               </button>
               
-              <!-- ADMIN LOGIN - Always visible (gear/cog icon for admin) -->
+              <!-- ADMIN LOGIN - Always visible -->
               <router-link to="/admin/login" class="luxury-header-action admin-login" :title="languageStore.t('adminLogin') || 'Admin Login'">
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
@@ -138,7 +137,7 @@
                 </svg>
               </router-link>
               
-              <!-- CUSTOMER LOGIN/ACCOUNT - Changes based on auth state -->
+              <!-- CUSTOMER LOGIN/ACCOUNT -->
               <button v-if="!isAuthenticated" class="luxury-header-action" @click="router.push('/login')" :aria-label="languageStore.t('customerLogin') || 'Customer Login'">
                 <svg class="luxury-icon" viewBox="0 0 24 24" fill="none">
                   <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
@@ -298,7 +297,6 @@
                   {{ languageStore.t('womens') }}
                 </router-link>
               </li>
-              <!-- NEW: Unisex Mobile Link -->
               <li class="mobile-nav-item">
                 <router-link to="/category/unisex" class="mobile-nav-link" @click="closeMobileMenu">
                   {{ languageStore.t('unisex') }}
@@ -517,10 +515,11 @@ const searchOpen = ref(false)
 
 // Computed
 const userInitials = computed(() => {
-  if (!user.value || !user.value.displayName) return 'U'
-  return user.value.displayName
+  // Safely access user (not a ref, just the object or null)
+  if (!user || !user.displayName) return 'U'
+  return user.displayName
     .split(' ')
-    .map(n => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
@@ -564,13 +563,6 @@ const toggleSearch = () => {
   } else {
     document.body.classList.remove('no-scroll')
   }
-}
-
-const closeAllMenus = () => {
-  mobileMenuOpen.value = false
-  userMenuOpen.value = false
-  searchOpen.value = false
-  document.body.classList.remove('no-scroll')
 }
 
 const handleMobileAction = (action: string) => {
@@ -1137,7 +1129,7 @@ onUnmounted(() => {
   display: none;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.2rem; /* Reduced from 0.25rem */
+  gap: 0.2rem;
   flex: 1;
 }
 
@@ -1150,8 +1142,8 @@ onUnmounted(() => {
 /* Mobile Action Icon Links - Smaller and consistent */
 .mobile-action-icon-link {
   position: relative;
-  width: 30px; /* Slightly smaller */
-  height: 30px; /* Slightly smaller */
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1165,8 +1157,8 @@ onUnmounted(() => {
 
 /* Mobile icons - smaller */
 .mobile-icon {
-  width: 15px; /* Slightly smaller */
-  height: 15px; /* Slightly smaller */
+  width: 15px;
+  height: 15px;
   stroke: currentColor;
 }
 

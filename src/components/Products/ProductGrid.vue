@@ -96,6 +96,9 @@ defineEmits<{
   'retry': []
 }>()
 
+// Mark props as used (for linter)
+void props
+
 const skeletonCount = 8
 </script>
 

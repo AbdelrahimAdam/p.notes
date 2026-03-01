@@ -30,7 +30,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Fresh Aromatic',
     iconicFragrance: 'Miss Dior',
     productCount: 6
-  } as Brand,
+  } as unknown as Brand,
   {
     id: 'chanel',
     slug: 'chanel',
@@ -53,7 +53,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Aldehydic Floral',
     iconicFragrance: 'Chanel No. 5',
     productCount: 3
-  } as Brand,
+  } as unknown as Brand,
   {
     id: 'tom-ford',
     slug: 'tom-ford',
@@ -76,7 +76,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Oriental Woody',
     iconicFragrance: 'Black Orchid',
     productCount: 4
-  } as Brand,
+  } as unknown as Brand,
   {
     id: 'gucci',
     slug: 'gucci',
@@ -99,7 +99,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Floral Musky',
     iconicFragrance: 'Guilty',
     productCount: 3
-  } as Brand,
+  } as unknown as Brand,
   {
     id: 'versace',
     slug: 'versace',
@@ -122,7 +122,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Fresh Aquatic',
     iconicFragrance: 'Bright Crystal',
     productCount: 2
-  } as Brand,
+  } as unknown as Brand,
   {
     id: 'yves-saint-laurent',
     slug: 'yves-saint-laurent',
@@ -145,7 +145,7 @@ export const brands: Brand[] = [
     signatureFamily: 'Floral Oriental',
     iconicFragrance: 'Opium',
     productCount: 2
-  } as Brand
+  } as unknown as Brand
 ]
 
 // Helper functions
