@@ -222,7 +222,6 @@ export const useAuthStore = defineStore('auth', () => {
       if (adminData) {
         setAdminUser(adminData)
         await updateDoc(doc(db, 'admins', firebaseUser.uid), { lastLogin: serverTimestamp() })
-        // Fixed: nullish coalescing to ensure string
         authNotification.loggedIn(adminData.displayName ?? 'Admin')
         console.log('✅ Admin authenticated:', adminData.email)
         return { ...adminData, role: 'admin' }
@@ -234,7 +233,6 @@ export const useAuthStore = defineStore('auth', () => {
           lastLogin: serverTimestamp(),
           updatedAt: serverTimestamp()
         })
-        // Fixed: nullish coalescing to ensure string
         authNotification.loggedIn(customerData.displayName ?? 'Customer')
         console.log('✅ Customer authenticated:', customerData.email)
         return { ...customerData, role: 'customer' }
@@ -245,7 +243,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err: any) {
       console.error('❌ Authentication error:', err)
       error.value = err.message || 'Invalid credentials'
-      authNotification.error(error.value)
+      authNotification.error(error.value ?? '')
       throw err
     } finally {
       isLoading.value = false
