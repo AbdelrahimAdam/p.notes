@@ -94,7 +94,7 @@
                   >
                     <div class="offer-image-full">
                       <img
-                        :src="activeOffers[currentOfferIndex].imageUrl || '/images/default-offer.jpg'"
+                        :src="activeOffers[currentOfferIndex].imageUrl || PLACEHOLDER_IMAGE"
                         :alt="activeOffers[currentOfferIndex].title || t('exclusiveOffer')"
                         class="offer-image"
                         @error="handleOfferImageError"
@@ -187,7 +187,7 @@
                 >
                   <div class="offer-image-full">
                     <img
-                      :src="activeOffers[currentOfferIndex].imageUrl || '/images/default-offer.jpg'"
+                      :src="activeOffers[currentOfferIndex].imageUrl || PLACEHOLDER_IMAGE"
                       :alt="activeOffers[currentOfferIndex].title || t('exclusiveOffer')"
                       class="offer-image"
                       @error="handleOfferImageError"
@@ -236,6 +236,9 @@ import { useLanguageStore } from '@/stores/language'
 import { useHomepageStore } from '@/stores/homepage'
 import { useBrandsStore } from '@/stores/brands'
 import type { Brand } from '@/types'
+
+// Transparent 1x1 GIF placeholder (data URI) – no network request
+const PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///y5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 const router = useRouter()
 const languageStore = useLanguageStore()
@@ -408,7 +411,8 @@ const handleBrandImageError = (event: Event) => {
 
 const handleOfferImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  img.src = '/images/default-offer.jpg'
+  // Use the same transparent placeholder to avoid further errors
+  img.src = PLACEHOLDER_IMAGE
 }
 </script>
 

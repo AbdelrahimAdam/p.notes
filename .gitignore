@@ -36,6 +36,7 @@ firebase-debug.log*
 # Uploaded / generated assets
 # ===============================
 public/images/products/
+.sitemap-generator-cache
 
 # ===============================
 # Editor / OS files
@@ -62,3 +63,15 @@ move
 # TypeScript
 # ===============================
 *.tsbuildinfo
+
+# ===============================
+# Vercel / Deployment
+# ===============================
+.vercel/
+.vercel.json
+
+# ===============================
+# Optional lock files
+# ===============================
+package-lock.json
+yarn.lock
