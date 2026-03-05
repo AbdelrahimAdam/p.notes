@@ -624,12 +624,12 @@ onUnmounted(() => {
 
 /* Add padding to the main content to account for fixed header */
 :global(body) {
-  padding-top: 80px;
+  padding-top: 69px; /* exactly matches header height on desktop */
 }
 
 @media (max-width: 768px) {
   :global(body) {
-    padding-top: 70px;
+    padding-top: 53px; /* exactly matches header height on mobile */
   }
 }
 
